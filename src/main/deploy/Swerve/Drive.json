@@ -1,0 +1,15 @@
+{
+    "wheelBase": 22.5,
+    "trackWidth": 22.5,
+    "wheelDiameter": 3.0,
+    "gearRatio": 4.71,
+    "maxSpeed": 15.76,
+    "maxAcceleration": 0.0,
+    "maxAngularVelocity": 6.28,
+    "speedP": 0.0,
+    "speedI": 0.0,
+    "speedD": 0.0,
+    "speedKs": 0.0,
+    "speedKv": 0.0,
+    "defaultFieldCentric": true
+}

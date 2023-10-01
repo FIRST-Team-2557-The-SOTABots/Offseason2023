@@ -1,0 +1,31 @@
+{
+    "name": "BackLeft",
+    "speedConfig": {
+        "port": 5,
+        "isInverted": false,
+        "motorModel": "SparkMax",
+        "motorType": "BRUSHLESS",
+        "neutralOperation": "BRAKE"
+    },
+    "angleConfig": {
+        "motorConfig": {
+            "port": 6,
+            "isInverted": false,
+            "motorModel": "SparkMax",
+            "motorType": "BRUSHLESS",
+            "neutralOperation": "BRAKE"
+        },
+        "encoderConfig": {
+            "encoderType": "SPARKMAX",
+            "isInverted": true,
+            "encoderOffset": 0.5
+        }
+    },
+    "angleP": 0.0,
+    "angleI": 0.0,
+    "angleD": 0.0,
+    "angleKs": 0.0,
+    "angleKv": 0.0,
+    "angleMaxVelocity": 0.0,
+    "angleMaxAcceleration": 0.0
+}
