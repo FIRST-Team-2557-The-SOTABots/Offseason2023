@@ -8,14 +8,13 @@ import java.io.IOException;
 
 import com.kauailabs.navx.frc.AHRS;
 
-import SOTAlib.Config.CompositeMotorConfig;
 import SOTAlib.Config.ConfigUtils;
 import SOTAlib.Config.SwerveDriveConfig;
 import SOTAlib.Config.SwerveModuleConfig;
+import SOTAlib.Control.SOTA_Xboxcontroller;
 import SOTAlib.Factories.CompositeMotorFactory;
 import SOTAlib.Factories.MotorControllerFactory;
 import SOTAlib.Gyro.NavX;
-import SOTAlib.MotorController.NullConfigException;
 import SOTAlib.MotorController.SOTA_CompositeMotor;
 import SOTAlib.MotorController.SOTA_MotorController;
 import SOTAlib.Swerve.SwerveDrive;
@@ -24,11 +23,13 @@ import SOTAlib.Swerve.SwerveModule;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.I2C.Port;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.Commands.DriveCommand;
 
 public class RobotContainer {
+  private SOTA_Xboxcontroller dController;
   private SOTA_CompositeMotor tCompositeMotor;
   private SwerveDriveInterface mSwerveDrive;
 
@@ -36,6 +37,8 @@ public class RobotContainer {
     CompositeMotorFactory mCompositeMotorFactory = new CompositeMotorFactory();
     ConfigUtils mConfigUtils = new ConfigUtils();
     
+    dController = new SOTA_Xboxcontroller(0);
+
     //Swerve Creation
     try {
       //Configs
@@ -84,9 +87,16 @@ public class RobotContainer {
     }
     
     configureBindings();
+    configureDefaultCommands();
+    
+  }
+
+  private void configureDefaultCommands() {
+    mSwerveDrive.setDefaultCommand(new DriveCommand(dController::getLeftY, dController::getLeftX, dController::getRightX, mSwerveDrive));
   }
 
   private void configureBindings() {
+    dController.start().onTrue(new InstantCommand(() -> mSwerveDrive.resetGyro(), mSwerveDrive));
   }
 
   public Command getAutonomousCommand() {
