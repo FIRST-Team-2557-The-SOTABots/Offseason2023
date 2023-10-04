@@ -6,9 +6,13 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.subsystems.DriveSubsystem;
 
 public class RobotContainer {
+
+  private final DriveSubsystem mDriveTrain;
   public RobotContainer() {
+    this.mDriveTrain = new DriveSubsystem();
     configureBindings();
   }
 
