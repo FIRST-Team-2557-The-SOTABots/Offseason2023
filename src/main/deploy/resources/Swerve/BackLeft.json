@@ -1,5 +1,6 @@
 {
     "name": "BackLeft",
+    "moduleOffset": 0.5,
     "speedConfig": {
         "port": 5,
         "isInverted": false,
@@ -17,8 +18,7 @@
         },
         "encoderConfig": {
             "encoderType": "SPARKMAX",
-            "isInverted": true,
-            "encoderOffset": 0.5
+            "isInverted": true
         }
     },
     "angleP": 0.0,
