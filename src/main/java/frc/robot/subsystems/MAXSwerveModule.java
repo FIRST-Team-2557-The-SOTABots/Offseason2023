@@ -7,6 +7,9 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -30,13 +33,22 @@ public class MAXSwerveModule {
   private double m_chassisAngularOffset = 0;
   private SwerveModuleState m_desiredState = new SwerveModuleState(0.0, new Rotation2d());
 
+  private String moduleName;
+  private ShuffleboardTab sTab;
+  private GenericEntry angleActualEntry;
+  private GenericEntry angleRequestedEntry;
+  private GenericEntry speedActualEntry;
+  private GenericEntry speedRequestedEntry;
+
   /**
    * Constructs a MAXSwerveModule and configures the driving and turning motor,
    * encoder, and PID controller. This configuration is specific to the REV
    * MAXSwerve Module built with NEOs, SPARKS MAX, and a Through Bore
    * Encoder.
    */
-  public MAXSwerveModule(int drivingCANId, int turningCANId, double chassisAngularOffset) {
+  public MAXSwerveModule(int drivingCANId, int turningCANId, double chassisAngularOffset, String moduleName) {
+    this.moduleName = moduleName;
+
     m_drivingSparkMax = new CANSparkMax(drivingCANId, MotorType.kBrushless);
     m_turningSparkMax = new CANSparkMax(turningCANId, MotorType.kBrushless);
 
@@ -108,6 +120,13 @@ public class MAXSwerveModule {
     m_chassisAngularOffset = chassisAngularOffset;
     m_desiredState.angle = new Rotation2d(m_turningEncoder.getPosition());
     m_drivingEncoder.setPosition(0);
+
+    this.sTab = Shuffleboard.getTab("Swerve");
+
+    this.angleActualEntry = sTab.add(moduleName + ": Actual Angle", 0.0).getEntry();
+    this.angleRequestedEntry = sTab.add(moduleName + ": Requested Angle", 0.0).getEntry();
+    this.speedActualEntry = sTab.add(moduleName + ": Speed Actual", 0).getEntry();
+    this.speedRequestedEntry = sTab.add(moduleName + ": Requested Speed", 0.0).getEntry();
   }
 
   /**
@@ -154,6 +173,11 @@ public class MAXSwerveModule {
     m_drivingPIDController.setReference(optimizedDesiredState.speedMetersPerSecond, CANSparkMax.ControlType.kVelocity);
     m_turningPIDController.setReference(optimizedDesiredState.angle.getRadians(), CANSparkMax.ControlType.kPosition);
 
+    angleRequestedEntry.setDouble(optimizedDesiredState.angle.getRadians());
+    angleActualEntry.setDouble(getPosition().angle.getRadians());
+
+    speedActualEntry.setDouble(m_drivingEncoder.getVelocity());
+    speedRequestedEntry.setDouble(optimizedDesiredState.speedMetersPerSecond);
     m_desiredState = desiredState;
   }
 
