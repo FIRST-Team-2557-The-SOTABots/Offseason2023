@@ -1,13 +1,13 @@
 {
     "port": 9,
     "isInverted": true,
-    "neutralOperation": "COAST",
+    "neutralOperation": "BRAKE",
     "motorType": "BRUSHLESS",
     "motorModel": "SparkMax",
     "countsPerRevolution": 2048,
         "motorLimitsConfig":{
         "lowerLimit": 0.2645, 
-        "upperLimit": 0.972,
+        "upperLimit": 0.8,
         "finalLimits": true
     },
     "currentLimit": 40
