@@ -29,7 +29,7 @@ public class Extension extends SubsystemBase{
         }
         if(!hasReset && speed > 0) speed = 0;
         mMotor.setVoltage(speed);
-        SmartDashboard.putNumber("extensionSpeed", speed);
+        SmartDashboard.putNumber("extensionVoltage", speed);
     }
  
 
@@ -64,7 +64,7 @@ public class Extension extends SubsystemBase{
         SmartDashboard.putBoolean("limitswitch", isFullyRetracted());
         // SmartDashboard.putNumber("extension motor limit", motor.getMotorLimits().getUpperLimit());
         SmartDashboard.putNumber("extension current", mMotor.getMotorCurrent());
-
+        SmartDashboard.putNumber("extensionVelocity in/sec", mMotor.getEncoderVelocity()/60);
     }
 
 }

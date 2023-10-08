@@ -17,9 +17,10 @@ public class RotationPID extends CommandBase{
         FLOOR(49),
         FLOORCONE(55),
         FLOORCONEKNOCK(69),
-        HIGH(118),
-        MID(110),
-        SUBSTATION(135),
+        HIGH(123),
+        MID(116),
+        MIDCONE(98),
+        SUBSTATION(140),
         SINGLE(98);
     
         public double degrees;

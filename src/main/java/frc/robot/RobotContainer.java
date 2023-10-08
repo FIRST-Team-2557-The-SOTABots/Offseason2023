@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.util.function.BooleanSupplier;
+
 import SOTAlib.Config.ConfigUtils;
 import SOTAlib.Config.EncoderConfig;
 import SOTAlib.Config.MotorControllerConfig;
@@ -22,7 +24,12 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.DriveCommand;
+import frc.robot.commands.ExtensionPID;
+import frc.robot.commands.JonasFunkyIntake;
+import frc.robot.commands.ResetExtension;
 import frc.robot.commands.RotationPID;
+import frc.robot.commands.ExtensionPID.ExtensionSetpoint;
 import frc.robot.commands.RotationPID.RotationSetpoint;
 import frc.robot.configs.SuperStructureConfig;
 import frc.robot.subsystems.DriveSubsystem;
@@ -43,7 +50,9 @@ public class RobotContainer {
   private Intake mIntake;
   private SuperStructure superStructure;
   private RotationPID rotationPID;
-  // private ExtensionPID extensionPID;
+  private ExtensionPID extensionPID;
+  private ResetExtension mResetExtension;
+  private JonasFunkyIntake mFunkyIntake;
 
   public RobotContainer() {
     this.configUtils = new ConfigUtils();
@@ -60,14 +69,12 @@ public class RobotContainer {
       SOTA_MotorController winchMotor = MotorControllerFactory.generateMotorController(
           configUtils.readFromClassPath(MotorControllerConfig.class, "SuperStructure/WinchMotor"));
 
-      // SOTA_MotorController intakeMotorTop =
-      // MotorControllerFactory.generateMotorController
-      // (configUtils.readFromClassPath(MotorControllerConfig.class,
-      // "SuperStructure/IntakeMotorTop"));
-      // SOTA_MotorController intakeMotorBottom =
-      // MotorControllerFactory.generateMotorController
-      // (configUtils.readFromClassPath(MotorControllerConfig.class,
-      // "SuperStructure/IntakeMotorBottom"));
+      SOTA_MotorController intakeMotor1 = MotorControllerFactory
+          .generateMotorController(configUtils.readFromClassPath(MotorControllerConfig.class,
+              "SuperStructure/IntakeMotor1"));
+      SOTA_MotorController intakeMotor2 = MotorControllerFactory
+          .generateMotorController(configUtils.readFromClassPath(MotorControllerConfig.class,
+              "SuperStructure/IntakeMotor2"));
 
       DigitalInput limitSwitch = new DigitalInput(0);
 
@@ -76,20 +83,19 @@ public class RobotContainer {
 
       this.mExtension = new Extension(winchMotor, limitSwitch, superStructureConfig);
       this.mRotation = new Rotation(rotationMotor, rotatiEncoder, superStructureConfig);
-      // this.mIntake = new Intake(intakeMotorTop, intakeMotorBottom);
+      this.mIntake = new Intake(intakeMotor1, intakeMotor2);
 
       this.superStructure = new SuperStructure(mExtension::getLength, mRotation::getRotationDegrees,
           superStructureConfig);
 
       ProfiledPIDController extensController = new ProfiledPIDController(5, 0, 0,
-          new TrapezoidProfile.Constraints(60.0, 100.0));
+          new TrapezoidProfile.Constraints(20.0, 20.0));
 
       this.rotationPID = new RotationPID(mRotation, mExtension::getLengthFromStart, superStructure::minRotation,
           superStructure::maxRotation, superStructureConfig);
-      // this.extensionPID = new ExtensionPID(extensController, mExtension,
-      // superStructure::maxExtension);
-      // this.mResetExtension = new ResetExtension(mExtension);
-      // this.intakeCommand = new BasicIntakeCommand(mIntake, mController::getLeftY);
+      this.extensionPID = new ExtensionPID(extensController, mExtension,
+          superStructure::maxExtension);
+      this.mResetExtension = new ResetExtension(mExtension);
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -99,35 +105,82 @@ public class RobotContainer {
   }
 
   private void setDefaultCommands() {
-    mDriveTrain.setDefaultCommand(new RunCommand(
-        () -> mDriveTrain.drive(
-            -MathUtil.applyDeadband(dController.getLeftY(), OIConstants.kDriveDeadband),
-            -MathUtil.applyDeadband(dController.getLeftX(), OIConstants.kDriveDeadband),
-            -MathUtil.applyDeadband(dController.getRightX(), OIConstants.kDriveDeadband),
-            driveFieldCentric, false),
-        mDriveTrain));
+    mDriveTrain.setDefaultCommand(new DriveCommand(dController::getLeftY, dController::getLeftX, dController::getRightX,
+        () -> getFieldCentric(), () -> isLowGear(), mDriveTrain));
 
     mRotation.setDefaultCommand(rotationPID);
+    mExtension.setDefaultCommand(extensionPID);
+  }
+
+  private Boolean getFieldCentric() {
+    return driveFieldCentric;
   }
 
   private void configureBindings() {
     dController.start().onTrue(new InstantCommand(
         () -> mDriveTrain.zeroHeading(), mDriveTrain));
 
-    dController.y().onTrue(new InstantCommand(
-        () -> {
-          if (driveFieldCentric) {
-            driveFieldCentric = false;
-          } else {
-            driveFieldCentric = true;
-          }
-          SmartDashboard.putBoolean("FieldCentric", driveFieldCentric);
-        }, mDriveTrain));
+    dController.rightBumper().onTrue(new InstantCommand(() -> {
+      driveFieldCentric = false;
+      SmartDashboard.putBoolean("fieldCentric", driveFieldCentric);
+    }, mDriveTrain));
 
-    mController.a().onTrue(new InstantCommand(() -> rotationPID.setSetpoint(RotationSetpoint.SUBSTATION), mRotation));
+    dController.leftBumper().onTrue(new InstantCommand(() -> {
+      driveFieldCentric = true;
+      SmartDashboard.putBoolean("fieldCentric", driveFieldCentric);
+    }, mDriveTrain));
+
+    mController.a().onTrue(new InstantCommand(() -> {
+      rotationPID.setSetpoint(RotationSetpoint.FLOORCONE);
+      extensionPID.setSetpoint(ExtensionSetpoint.FLOORCONE);
+    }, mRotation, mExtension)).onFalse(restCommand());
+
+    mController.b().onTrue(new InstantCommand(() -> {
+      rotationPID.setSetpoint(RotationSetpoint.MID);
+      extensionPID.setSetpoint(ExtensionSetpoint.MID);
+    }, mRotation, mExtension)).onFalse(restCommand());
+
+    mController.x().onTrue(new InstantCommand(() -> {
+    rotationPID.setSetpoint(RotationSetpoint.MIDCONE);
+    extensionPID.setSetpoint(ExtensionSetpoint.MIDCONE);
+    }, mRotation, mExtension)).onFalse(restCommand());
+
+    mController.y().onTrue(new InstantCommand(() -> {
+      rotationPID.setSetpoint(RotationSetpoint.HIGH);
+      extensionPID.setSetpoint(ExtensionSetpoint.HIGH);
+    }, mRotation, mExtension)).onFalse(restCommand());
+
+    mController.leftStick().onTrue(new InstantCommand(() -> {
+      rotationPID.setSetpoint(RotationSetpoint.SINGLE);
+      extensionPID.setSetpoint(ExtensionSetpoint.SINGLE);
+    }, mRotation, mExtension)).onFalse(restCommand());
+
+    mController.rightStick().onTrue(new InstantCommand(() -> {
+      rotationPID.setSetpoint(RotationSetpoint.SUBSTATION);
+      extensionPID.setSetpoint(ExtensionSetpoint.SUBSTATION);
+    }, mRotation, mExtension)).onFalse(restCommand());
+
+    mController.start().onTrue(mResetExtension);
+
+    mController.rightBumper().whileTrue(Commands.run(
+        () -> mIntake.set(0.5), mIntake)).onFalse(Commands.run(() -> mIntake.set(0.0), mIntake));
+
+    mController.leftBumper().whileTrue(Commands.run(() -> mIntake.set(-0.5), mIntake))
+        .onFalse(Commands.run(() -> mIntake.set(0), mIntake));
+  }
+
+  public InstantCommand restCommand() {
+    return new InstantCommand(() -> {
+      rotationPID.setSetpoint(RotationSetpoint.REST);
+      extensionPID.setSetpoint(ExtensionSetpoint.REST);
+    }, mRotation, mExtension);
   }
 
   public Command getAutonomousCommand() {
     return Commands.print("No autonomous command configured");
+  }
+
+  public boolean isLowGear() {
+    return dController.getLeftTriggerAxis() > 0.05;
   }
 }

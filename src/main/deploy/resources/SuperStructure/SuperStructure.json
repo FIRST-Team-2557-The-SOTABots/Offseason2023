@@ -20,7 +20,7 @@
     "rotationMaxVel": 50.0,
     "rotationMaxAccel": 10000.0,
 
-    "extensionKP": 3.0,
+    "extensionKP": 12.0,
     "extensionKI": 0.0,
     "extensionKD": 0.0,
     "extensionMaxVel": 40.0,
