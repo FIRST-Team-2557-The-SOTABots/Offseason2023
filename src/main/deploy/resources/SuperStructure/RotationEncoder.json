@@ -1,0 +1,5 @@
+{
+    "port": 1,
+    "encoderOffset": 0.29,
+    "encoderType": "DUTYCYCLE"
+}
