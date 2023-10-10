@@ -158,29 +158,29 @@ public class MAXSwerveModule {
         new Rotation2d(m_turningEncoder.getPosition() - m_chassisAngularOffset));
   }
 
-  public void drive(REVSwerveModuleState state) { // TODO: Change back to SwerveModuleState
-    state = REVSwerveModuleState.optimize(state, getRotation2d());
+  // public void drive(REVSwerveModuleState state) { // TODO: make this work
+  //   state = REVSwerveModuleState.optimize(state, getRotation2d());
 
-    double angleSetpointNative = Math.abs(radiansToNative(state.angle.getRadians()));
-    double anglePIDOutput = mAnglePID.calculate(getAngle(), angleSetpointNative);
-    double angleFFOutput = mAngleFF.calculate(mAnglePID.getSetpoint().velocity);
+  //   double angleSetpointNative = Math.abs(radiansToNative(state.angle.getRadians()));
+  //   double anglePIDOutput = mAnglePID.calculate(getAngle(), angleSetpointNative);
+  //   double angleFFOutput = mAngleFF.calculate(mAnglePID.getSetpoint().velocity);
 
-    double speedSetpointNative = metersPerSecondToNative(state.speedMetersPerSecond, kGearRatios[mGear.getAsInt()]);
-    double speedPIDOutput = mSpeedPID.calculate(mSpeedMotor.getNativeEncoderVelocity(), speedSetpointNative);
-    double speedFFOutput = mSpeedFF.calculate(speedSetpointNative);
+  //   double speedSetpointNative = metersPerSecondToNative(state.speedMetersPerSecond, kGearRatios[mGear.getAsInt()]);
+  //   double speedPIDOutput = mSpeedPID.calculate(mSpeedMotor.getNativeEncoderVelocity(), speedSetpointNative);
+  //   double speedFFOutput = mSpeedFF.calculate(speedSetpointNative);
 
-    // double error =  getAngle() - angleSetpointNative;
-    // SmartDashboard.putNumber("angle error" + mModulePosition,error);
+  //   // double error =  getAngle() - angleSetpointNative;
+  //   // SmartDashboard.putNumber("angle error" + mModulePosition,error);
     
-    double error = speedSetpointNative - mSpeedMotor.getNativeEncoderVelocity();
-    SmartDashboard.putNumber("speed error " + mModulePosition, error);
+  //   double error = speedSetpointNative - mSpeedMotor.getNativeEncoderVelocity();
+  //   SmartDashboard.putNumber("speed error " + mModulePosition, error);
 
 
-    mAngleMotor.setVoltage(speedSetpointNative == 0 ? 0 :  angleFFOutput + anglePIDOutput);
-    mSpeedMotor.setVoltage(speedFFOutput + speedPIDOutput);
+  //   mAngleMotor.setVoltage(speedSetpointNative == 0 ? 0 :  angleFFOutput + anglePIDOutput);
+  //   mSpeedMotor.setVoltage(speedFFOutput + speedPIDOutput);
 
 
-  }
+  // }
 
 
 
