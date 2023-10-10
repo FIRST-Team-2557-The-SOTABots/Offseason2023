@@ -4,7 +4,15 @@
 
 package frc.robot;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BooleanSupplier;
+
+import com.pathplanner.lib.auto.SwerveAutoBuilder;
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
+
 
 import SOTAlib.Config.ConfigUtils;
 import SOTAlib.Config.EncoderConfig;
@@ -23,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.DriveCommand;
 import frc.robot.commands.ExtensionPID;
@@ -37,6 +46,11 @@ import frc.robot.subsystems.Extension;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Rotation;
 import frc.robot.subsystems.SuperStructure;
+import frc.robot.commands.Autos.PlaceConeCharge;
+import frc.robot.commands.Autos.PlaceConeMobility;
+import frc.robot.commands.Autos.TestAuto;
+import SOTAlib.Factories.AutoFactory;
+
 
 public class RobotContainer {
 
@@ -53,6 +67,9 @@ public class RobotContainer {
   private ExtensionPID extensionPID;
   private ResetExtension mResetExtension;
   private JonasFunkyIntake mFunkyIntake;
+  private SwerveAutoBuilder mAutoBuilder;
+  private SendableChooser<Command> mAutoChooser;
+
 
   public RobotContainer() {
     this.configUtils = new ConfigUtils();
@@ -100,6 +117,28 @@ public class RobotContainer {
     } catch (Exception e) {
       e.printStackTrace();
     }
+
+    Map<String, Command> eventMap = new HashMap<String, Command>();
+
+
+      eventMap.put("test-event", new InstantCommand(
+        () -> {
+          rotationPID.setSetpoint(RotationSetpoint.MID);
+          extensionPID.setSetpoint(ExtensionSetpoint.MID);
+        },
+        mRotation, mExtension
+      ));
+      eventMap.put("event2", new InstantCommand(
+        () -> {
+          rotationPID.setSetpoint(RotationSetpoint.MID);
+          extensionPID.setSetpoint(ExtensionSetpoint.MID);
+        },
+        mRotation, mExtension
+      ));
+      mAutoBuilder = AutoFactory.swerveAutoBuilderGenerator(mDriveTrain, eventMap);
+
+    configureAutos();
+
     setDefaultCommands();
     configureBindings();
   }
@@ -167,6 +206,44 @@ public class RobotContainer {
 
     mController.leftBumper().whileTrue(Commands.run(() -> mIntake.set(-0.5), mIntake))
         .onFalse(Commands.run(() -> mIntake.set(0), mIntake));
+  }
+
+  
+
+  public void configureAutos(){
+
+    this.mAutoChooser = new SendableChooser<>();
+    this.mAutoChooser.setDefaultOption("None", null);
+
+    // List of autos to choose from
+
+    mAutoChooser.addOption("Place and Mobility", new PlaceConeMobility(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mAutoBuilder, 
+      mIntake, PathPlanner.loadPath("R Cone Mobil", new PathConstraints(2, 1)), new ResetExtension(mExtension)));
+    mAutoChooser.addOption("Place Charge Mobility", new PlaceConeCharge(extensionPID, rotationPID, mIntake, mAutoBuilder, mDriveTrain, 
+    mResetExtension, PathPlanner.loadPath("C Cone Mobil Charge", new PathConstraints(1, 1))));
+    mAutoChooser.addOption("Test path", new TestAuto(mDriveTrain, extensionPID, rotationPID, mAutoBuilder, mIntake, 
+    PathPlanner.loadPath("Test Path", new PathConstraints(2, 2)), mResetExtension));
+
+    SmartDashboard.putData(mAutoChooser);
+  }
+
+  public ExtensionPID getNewExtensionPID() {
+
+    ProfiledPIDController autoExtensController = new ProfiledPIDController(3, 0, 0, null);
+    new TrapezoidProfile.Constraints(40.8, 80.0);
+    return new ExtensionPID(autoExtensController, mExtension, superStructure::maxExtension);
+
+  }
+
+  public RotationPID getNewRotationPID(){
+    try {
+      SuperStructureConfig autoSuperStructureConfig = configUtils.readFromClassPath(SuperStructureConfig.class,
+        "SuperStructure/SuperStructure");
+    return new RotationPID(mRotation, mExtension::getLengthFromStart, 
+    superStructure::minRotation, superStructure::maxRotation, autoSuperStructureConfig);
+    } catch(IOException e) {
+      throw new RuntimeException("Not able to create rotation PID");
+    }
   }
 
   public InstantCommand restCommand() {

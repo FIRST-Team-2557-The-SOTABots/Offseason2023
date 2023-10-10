@@ -15,6 +15,9 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import com.revrobotics.SparkMaxAbsoluteEncoder.Type;
+
+import SOTAlib.Swerve.REVSwerveModuleState;
+
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
@@ -154,6 +157,33 @@ public class MAXSwerveModule {
         m_drivingEncoder.getPosition(),
         new Rotation2d(m_turningEncoder.getPosition() - m_chassisAngularOffset));
   }
+
+  public void drive(REVSwerveModuleState state) { // TODO: Change back to SwerveModuleState
+    state = REVSwerveModuleState.optimize(state, getRotation2d());
+
+    double angleSetpointNative = Math.abs(radiansToNative(state.angle.getRadians()));
+    double anglePIDOutput = mAnglePID.calculate(getAngle(), angleSetpointNative);
+    double angleFFOutput = mAngleFF.calculate(mAnglePID.getSetpoint().velocity);
+
+    double speedSetpointNative = metersPerSecondToNative(state.speedMetersPerSecond, kGearRatios[mGear.getAsInt()]);
+    double speedPIDOutput = mSpeedPID.calculate(mSpeedMotor.getNativeEncoderVelocity(), speedSetpointNative);
+    double speedFFOutput = mSpeedFF.calculate(speedSetpointNative);
+
+    // double error =  getAngle() - angleSetpointNative;
+    // SmartDashboard.putNumber("angle error" + mModulePosition,error);
+    
+    double error = speedSetpointNative - mSpeedMotor.getNativeEncoderVelocity();
+    SmartDashboard.putNumber("speed error " + mModulePosition, error);
+
+
+    mAngleMotor.setVoltage(speedSetpointNative == 0 ? 0 :  angleFFOutput + anglePIDOutput);
+    mSpeedMotor.setVoltage(speedFFOutput + speedPIDOutput);
+
+
+  }
+
+
+
 
   /**
    * Sets the desired state for the module.

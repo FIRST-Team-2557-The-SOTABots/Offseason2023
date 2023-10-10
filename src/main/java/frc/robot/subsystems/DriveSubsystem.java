@@ -5,10 +5,14 @@
 package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
+import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
 
+import SOTAlib.Swerve.REVSwerveModuleState;
+import SOTAlib.Swerve.ShiftingSwerveModuleState;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
@@ -18,9 +22,11 @@ import edu.wpi.first.util.WPIUtilJNI;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.SPI.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.Constants.DriveConstants;
 import frc.utils.SwerveUtils;
 import frc.robot.subsystems.MAXSwerveModule;
+import frc.robot.Constants;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DriveSubsystem extends SubsystemBase {
@@ -57,9 +63,13 @@ public class DriveSubsystem extends SubsystemBase {
   private double m_currentTranslationDir = 0.0;
   private double m_currentTranslationMag = 0.0;
 
+  private SwerveDriveKinematics mSwerveDriveKinematics;
+
   private SlewRateLimiter m_magLimiter = new SlewRateLimiter(DriveConstants.kMagnitudeSlewRate);
   private SlewRateLimiter m_rotLimiter = new SlewRateLimiter(DriveConstants.kRotationalSlewRate);
   private double m_prevTime = WPIUtilJNI.now() * 1e-6;
+
+  private MAXSwerveModule[] mModuleArray = {m_frontLeft, m_frontRight, m_rearLeft, m_rearRight};
 
   // Odometry class for tracking robot pose
   SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
@@ -102,6 +112,35 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public Pose2d getPose() {
     return m_odometry.getPoseMeters();
+  }
+
+  public void updatePose(Pose2d pose2d){
+    m_odometry.resetPosition(getRotation2d(), getModulePositions(), pose2d);
+  }
+  
+  private SwerveModulePosition[] getModulePositions() {
+    int moduleNum = mModuleArray.length;
+    SwerveModulePosition[] modulePositions = new SwerveModulePosition[moduleNum];
+    for (int i = 0; i < moduleNum; i++) {
+      modulePositions[i] = mModuleArray[i].getPosition();
+    }
+    return modulePositions;
+  }
+
+  private Rotation2d getRotation2d() {
+    return m_gyro.getRotation2d();
+  }
+
+  public void drive(SwerveModuleState[] moduleStates) {
+    for (int i = 0; i < moduleStates.length; i++) {
+      mModuleArray[i].drive(moduleStates[i]);
+    }
+  }
+
+  public void drive(ChassisSpeeds speeds){
+    SwerveModuleState[] moduleStates = mSwerveDriveKinematics.toSwerveModuleStates(speeds, new Translation2d());
+    SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, DriveConstants.kMaxSpeedMetersPerSecond);
+    drive(REVSwerveModuleState.toSwerveModuleState(moduleStates));
   }
 
   /**
