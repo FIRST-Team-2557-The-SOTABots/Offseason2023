@@ -45,6 +45,7 @@ public class RobotContainer {
   private SOTA_Xboxcontroller mController = new SOTA_Xboxcontroller(1);
   private final DriveSubsystem mDriveTrain;
   private boolean driveFieldCentric = true; // REV code is trash and we have to manage this out here
+  private boolean driveLowGear = false; //not a physical low gear just an in code thing
   private Extension mExtension;
   private Rotation mRotation;
   private Intake mIntake;
@@ -112,6 +113,10 @@ public class RobotContainer {
     mExtension.setDefaultCommand(extensionPID);
   }
 
+  private boolean isLowGear() {
+    return driveLowGear;
+  }
+
   private Boolean getFieldCentric() {
     return driveFieldCentric;
   }
@@ -128,6 +133,14 @@ public class RobotContainer {
     dController.leftBumper().onTrue(new InstantCommand(() -> {
       driveFieldCentric = true;
       SmartDashboard.putBoolean("fieldCentric", driveFieldCentric);
+    }, mDriveTrain));
+
+    dController.getRightTrigger().onTrue(new InstantCommand(() -> {
+      driveLowGear = true;
+      SmartDashboard.putBoolean("Low Gear", driveLowGear);
+    }, mDriveTrain)).onFalse(new InstantCommand(() -> {
+      driveLowGear = false;
+      SmartDashboard.putBoolean("Low Gear", driveLowGear);
     }, mDriveTrain));
 
     mController.a().onTrue(new InstantCommand(() -> {
@@ -150,12 +163,12 @@ public class RobotContainer {
       extensionPID.setSetpoint(ExtensionSetpoint.HIGH);
     }, mRotation, mExtension)).onFalse(restCommand());
 
-    mController.leftStick().onTrue(new InstantCommand(() -> {
+    mController.getRightTrigger().onTrue(new InstantCommand(() -> {
       rotationPID.setSetpoint(RotationSetpoint.SINGLE);
       extensionPID.setSetpoint(ExtensionSetpoint.SINGLE);
     }, mRotation, mExtension)).onFalse(restCommand());
 
-    mController.rightStick().onTrue(new InstantCommand(() -> {
+    mController.getLeftTrigger().onTrue(new InstantCommand(() -> {
       rotationPID.setSetpoint(RotationSetpoint.SUBSTATION);
       extensionPID.setSetpoint(ExtensionSetpoint.SUBSTATION);
     }, mRotation, mExtension)).onFalse(restCommand());
@@ -180,7 +193,4 @@ public class RobotContainer {
     return Commands.print("No autonomous command configured");
   }
 
-  public boolean isLowGear() {
-    return dController.getLeftTriggerAxis() > 0.05;
-  }
 }
