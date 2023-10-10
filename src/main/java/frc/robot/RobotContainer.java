@@ -29,6 +29,7 @@ import frc.robot.commands.ExtensionPID;
 import frc.robot.commands.JonasFunkyIntake;
 import frc.robot.commands.ResetExtension;
 import frc.robot.commands.RotationPID;
+import frc.robot.commands.Autos.AutoLevel;
 import frc.robot.commands.ExtensionPID.ExtensionSetpoint;
 import frc.robot.commands.RotationPID.RotationSetpoint;
 import frc.robot.configs.SuperStructureConfig;
@@ -121,9 +122,17 @@ public class RobotContainer {
     return driveFieldCentric;
   }
 
+  private void setFieldCentric(boolean state) {
+    this.driveFieldCentric = state;
+  }
+
   private void configureBindings() {
     dController.start().onTrue(new InstantCommand(
         () -> mDriveTrain.zeroHeading(), mDriveTrain));
+
+    dController.back().whileTrue(new AutoLevel(mDriveTrain, 
+    () -> getFieldCentric(), 
+    (state) -> setFieldCentric(state)));
 
     dController.rightBumper().onTrue(new InstantCommand(() -> {
       driveFieldCentric = false;
