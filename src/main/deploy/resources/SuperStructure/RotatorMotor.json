@@ -5,11 +5,6 @@
     "motorType": "BRUSHLESS",
     "motorModel": "SparkMax",
     "countsPerRevolution": 2048,
-        "motorLimitsConfig":{
-        "lowerLimit": 0.19, 
-        "upperLimit": 0.8,
-        "finalLimits": true
-    },
     "currentLimit": 40
 
 }

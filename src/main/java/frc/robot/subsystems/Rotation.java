@@ -23,6 +23,7 @@ public class Rotation extends SubsystemBase {
   public Rotation(SOTA_MotorController motor, SOTA_AbsoulteEncoder encoder, SuperStructureConfig config) {
     this.mMotor = motor;
     this.mEncoder = encoder;
+    mMotor.setEncoderPosition(mEncoder.getPosition());
     kEncoderAtZero = config.getEncoderAtZeroDegrees();
     kEncoderPerDegree = 1/360.0;
 
@@ -34,6 +35,7 @@ public class Rotation extends SubsystemBase {
   }
 
   public void set(double speed) {
+    SmartDashboard.putNumber("Rotate motor speed", speed);
     mMotor.set(speed);
   }
 
@@ -59,8 +61,13 @@ public class Rotation extends SubsystemBase {
 
   @Override
   public void periodic() {
-    mMotor.setEncoderPosition(mEncoder.getPosition());
+    /**
+     * DON'T CALL THIS IN PERIODIC
+     * setting the encoder position of the motor stops the motor, caused very jittery movement
+     */
+    // mMotor.setEncoderPosition(mEncoder.getPosition());
     updateSD();
+    SmartDashboard.putNumber("Rotate Motor output", mMotor.get());
     // SmartDashboard.putNumber("Arm Angle", getRotationDegrees());
     // SmartDashboard.putNumber("Angle Encoder", getRotatorEncoder());
     // SmartDashboard.putNumber("No Offset",
