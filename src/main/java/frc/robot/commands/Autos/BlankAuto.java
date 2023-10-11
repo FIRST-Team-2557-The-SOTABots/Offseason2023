@@ -5,6 +5,7 @@ import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -17,31 +18,28 @@ import frc.robot.commands.RotationPID.RotationSetpoint;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.DriveSubsystem;
 
-public class TestAuto extends SequentialCommandGroup {
+
+public class BlankAuto extends SequentialCommandGroup{
     
 
-    public TestAuto (
-
-    DriveSubsystem swerveDrive,
-    ExtensionPID mExtensionPID,
-    RotationPID mRotationPID,
+    public BlankAuto(
+    ExtensionPID extensionPID,
+    RotationPID rotationPID,
+    Intake intake,
     SwerveAutoBuilder autoBuilder,
-    Intake mIntake,
-    PathPlannerTrajectory trajectory,
-    ResetExtension resetExtension
+    DriveSubsystem swerveDrive,
+    ResetExtension resetExtension,
+    PathPlannerTrajectory trajectory) {
 
-    ) {
         addCommands(
-            resetExtension,
-            new InstantCommand(() -> {
-                // autoBuilder.followPath(trajectory);
-            }) 
 
+          new PrintCommand("This is a blank auto")  
 
         );
 
-        
 
 
     }
+
+
 }

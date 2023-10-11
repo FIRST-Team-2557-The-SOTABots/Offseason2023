@@ -133,7 +133,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   public void drive(SwerveModuleState[] moduleStates) {
     for (int i = 0; i < moduleStates.length; i++) {
-      mModuleArray[i].drive(moduleStates[i]);
+      mModuleArray[i].setDesiredState(moduleStates[i]);
     }
   }
 
