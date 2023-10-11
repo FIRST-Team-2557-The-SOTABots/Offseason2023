@@ -153,8 +153,8 @@ public class RobotContainer {
     }, mDriveTrain));
 
     mController.a().onTrue(new InstantCommand(() -> {
-      rotationPID.setSetpoint(RotationSetpoint.FLOORCONE);
-      extensionPID.setSetpoint(ExtensionSetpoint.FLOORCONE);
+      rotationPID.setSetpoint(RotationSetpoint.FLOOR);
+      extensionPID.setSetpoint(ExtensionSetpoint.FLOOR);
     }, mRotation, mExtension)).onFalse(restCommand());
 
     mController.b().onTrue(new InstantCommand(() -> {

@@ -12,7 +12,7 @@ public class ExtensionPID extends CommandBase {
     public enum ExtensionSetpoint {
         RESET(-0.5),
         REST(-0.5),
-        FLOOR(10),
+        FLOOR(17), //for teleop
         FLOORCONE(17),
         HIGH(38), // 32 for old claw
         MID(15),
