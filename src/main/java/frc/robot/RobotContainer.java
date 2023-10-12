@@ -184,10 +184,10 @@ public class RobotContainer {
 
     mController.start().onTrue(mResetExtension);
 
-    mController.rightBumper().whileTrue(Commands.run(
+    mController.leftBumper().whileTrue(Commands.run(
         () -> mIntake.set(0.5), mIntake)).onFalse(Commands.run(() -> mIntake.set(0.0), mIntake));
 
-    mController.leftBumper().whileTrue(Commands.run(() -> mIntake.set(-0.5), mIntake))
+    mController.rightBumper().whileTrue(Commands.run(() -> mIntake.set(-0.5), mIntake))
         .onFalse(Commands.run(() -> mIntake.set(0), mIntake));
   }
 
