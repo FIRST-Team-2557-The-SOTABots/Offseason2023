@@ -153,8 +153,8 @@ public class RobotContainer {
   private void setDefaultCommands() {
     mDriveTrain.setDefaultCommand(new DriveCommand(dController::getLeftY, dController::getLeftX, dController::getRightX,
         () -> getFieldCentric(), () -> isLowGear(), mDriveTrain));
-
-    mRotation.setDefaultCommand(rotationPID);
+    
+    mRotation.setDefaultCommand(rotationPID); // ???
     mExtension.setDefaultCommand(extensionPID);
   }
 
@@ -246,10 +246,10 @@ public class RobotContainer {
 
     mAutoChooser.addOption("Place and Mobility", new PlaceConeMobility(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mAutoBuilder, 
       mIntake, PathPlanner.loadPath("R Cone Mobil", new PathConstraints(2, 1)), new ResetExtension(mExtension)));
-    mAutoChooser.addOption("Place Charge Mobility", new PlaceConeCharge(extensionPID, rotationPID, mIntake, mAutoBuilder, mDriveTrain, 
+    mAutoChooser.addOption("Place Charge Mobility", new PlaceConeCharge(getNewExtensionPID(), getNewRotationPID(), mIntake, mAutoBuilder, mDriveTrain, 
     mResetExtension, PathPlanner.loadPath("C Cone Mobil Charge", new PathConstraints(1, 1))));
-    mAutoChooser.addOption("Test path", new TestAuto(mDriveTrain, extensionPID, rotationPID, mAutoBuilder, mIntake, 
-    PathPlanner.loadPath("Test Path", new PathConstraints(2, 2)), mResetExtension));
+    mAutoChooser.addOption("Test path", new TestAuto(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mAutoBuilder, mIntake, 
+    PathPlanner.loadPath("Test Path", new PathConstraints(2, 2)), new ResetExtension(mExtension)));
 
     SmartDashboard.putData(mAutoChooser);
   }
@@ -281,7 +281,8 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
+    // return mAutoChooser.getSelected();
+    return new PrintCommand("No Autonomous Configured");
   }
 
 }

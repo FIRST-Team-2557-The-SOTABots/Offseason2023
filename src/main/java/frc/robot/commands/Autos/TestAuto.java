@@ -34,7 +34,7 @@ public class TestAuto extends SequentialCommandGroup {
         addCommands(
             resetExtension,
             new InstantCommand(() -> {
-                // autoBuilder.followPath(trajectory);
+                autoBuilder.followPath(trajectory);
             }) 
 
 

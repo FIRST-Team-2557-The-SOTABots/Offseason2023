@@ -16,10 +16,11 @@ import frc.robot.commands.ExtensionPID.ExtensionSetpoint;
 import frc.robot.commands.RotationPID.RotationSetpoint;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.Extension;
 
 public class PlaceConeCharge extends SequentialCommandGroup {
     
-
+    private Extension extension;
 
     public PlaceConeCharge(
         ExtensionPID extensionPID,
@@ -29,6 +30,8 @@ public class PlaceConeCharge extends SequentialCommandGroup {
         DriveSubsystem swerveDrive,
         ResetExtension resetExtension,
         PathPlannerTrajectory trajectory) {
+
+            // resetExtension = new ResetExtension(extension);
 
         addCommands(
             resetExtension,
