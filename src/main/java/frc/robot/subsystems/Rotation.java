@@ -59,7 +59,7 @@ public class Rotation extends SubsystemBase {
 
   @Override
   public void periodic() {
-    mMotor.setEncoderPosition(mEncoder.getPosition());
+    // mMotor.setEncoderPosition(mEncoder.getPosition());
     updateSD();
     // SmartDashboard.putNumber("Arm Angle", getRotationDegrees());
     // SmartDashboard.putNumber("Angle Encoder", getRotatorEncoder());
