@@ -7,7 +7,7 @@ package frc.robot.subsystems;
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
 
-import SOTAlib.Swerve.REVSwerveModuleState;
+import frc.robot.subsystems.REVSwerveModuleState;
 import SOTAlib.Swerve.ShiftingSwerveModuleState;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
