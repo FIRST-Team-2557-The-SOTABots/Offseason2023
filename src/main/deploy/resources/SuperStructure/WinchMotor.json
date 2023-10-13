@@ -1,6 +1,6 @@
 {
     "port": 10,
-    "isInverted": true,
+    "isInverted": false,
     "neutralOperation": "BRAKE",
     "motorType": "BRUSHLESS",
     "motorModel": "SparkMax",

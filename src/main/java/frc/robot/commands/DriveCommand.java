@@ -33,26 +33,13 @@ public class DriveCommand extends CommandBase {
 
     @Override
     public void execute() {
-        double frwd;
-        double strf;
-        double rot;
-
         SmartDashboard.putBoolean("lowGear", lowGear.getAsBoolean());
 
-        if (lowGear.getAsBoolean()) {
-            frwd = frwdSup.getAsDouble() * 0.5;
-            strf = strfSup.getAsDouble() * 0.5;
-            rot = rotSup.getAsDouble() * 0.5;
-        } else {
-            frwd = frwdSup.getAsDouble();
-            strf = strfSup.getAsDouble();
-            rot = rotSup.getAsDouble();
-        }
         mDrive.drive(
-                -MathUtil.applyDeadband(frwd, OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(strf, OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(rot, OIConstants.kDriveDeadband),
-                fieldCentric.getAsBoolean(), false);
+                -MathUtil.applyDeadband(frwdSup.getAsDouble(), OIConstants.kDriveDeadband),
+                -MathUtil.applyDeadband(strfSup.getAsDouble(), OIConstants.kDriveDeadband),
+                -MathUtil.applyDeadband(rotSup.getAsDouble(), OIConstants.kDriveDeadband),
+                fieldCentric.getAsBoolean(), lowGear.getAsBoolean());
     }
 
 }

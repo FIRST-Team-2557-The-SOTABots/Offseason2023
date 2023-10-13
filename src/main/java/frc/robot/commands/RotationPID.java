@@ -14,9 +14,9 @@ public class RotationPID extends CommandBase{
     public enum RotationSetpoint {
         RESET(150),
         REST(175),
-        FLOOR(49),
-        FLOORCONE(55),
-        FLOORCONEKNOCK(69),
+        FLOOR(50), //for teleop
+        FLOORCONE(70),
+        FLOORCONEKNOCK(65),
         HIGH(123),
         MID(116),
         MIDCONE(98),

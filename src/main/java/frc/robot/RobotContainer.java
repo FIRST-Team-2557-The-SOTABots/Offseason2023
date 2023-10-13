@@ -39,6 +39,7 @@ import frc.robot.commands.ExtensionPID;
 import frc.robot.commands.JonasFunkyIntake;
 import frc.robot.commands.ResetExtension;
 import frc.robot.commands.RotationPID;
+import frc.robot.commands.Autos.AutoLevel;
 import frc.robot.commands.ExtensionPID.ExtensionSetpoint;
 import frc.robot.commands.RotationPID.RotationSetpoint;
 import frc.robot.configs.SuperStructureConfig;
@@ -60,6 +61,7 @@ public class RobotContainer {
   private SOTA_Xboxcontroller mController = new SOTA_Xboxcontroller(1);
   private final DriveSubsystem mDriveTrain;
   private boolean driveFieldCentric = true; // REV code is trash and we have to manage this out here
+  private boolean driveLowGear = false; //not a physical low gear just an in code thing
   private Extension mExtension;
   private Rotation mRotation;
   private Intake mIntake;
@@ -156,13 +158,25 @@ public class RobotContainer {
     mExtension.setDefaultCommand(extensionPID);
   }
 
+  private boolean isLowGear() {
+    return driveLowGear;
+  }
+
   private Boolean getFieldCentric() {
     return driveFieldCentric;
+  }
+
+  private void setFieldCentric(boolean state) {
+    this.driveFieldCentric = state;
   }
 
   private void configureBindings() {
     dController.start().onTrue(new InstantCommand(
         () -> mDriveTrain.zeroHeading(), mDriveTrain));
+
+    dController.back().whileTrue(new AutoLevel(mDriveTrain, 
+    () -> getFieldCentric(), 
+    (state) -> setFieldCentric(state)));
 
     dController.rightBumper().onTrue(new InstantCommand(() -> {
       driveFieldCentric = false;
@@ -174,9 +188,17 @@ public class RobotContainer {
       SmartDashboard.putBoolean("fieldCentric", driveFieldCentric);
     }, mDriveTrain));
 
+    dController.getRightTrigger().onTrue(new InstantCommand(() -> {
+      driveLowGear = true;
+      SmartDashboard.putBoolean("Low Gear", driveLowGear);
+    }, mDriveTrain)).onFalse(new InstantCommand(() -> {
+      driveLowGear = false;
+      SmartDashboard.putBoolean("Low Gear", driveLowGear);
+    }, mDriveTrain));
+
     mController.a().onTrue(new InstantCommand(() -> {
-      rotationPID.setSetpoint(RotationSetpoint.FLOORCONE);
-      extensionPID.setSetpoint(ExtensionSetpoint.FLOORCONE);
+      rotationPID.setSetpoint(RotationSetpoint.FLOOR);
+      extensionPID.setSetpoint(ExtensionSetpoint.FLOOR);
     }, mRotation, mExtension)).onFalse(restCommand());
 
     mController.b().onTrue(new InstantCommand(() -> {
@@ -194,22 +216,22 @@ public class RobotContainer {
       extensionPID.setSetpoint(ExtensionSetpoint.HIGH);
     }, mRotation, mExtension)).onFalse(restCommand());
 
-    mController.leftStick().onTrue(new InstantCommand(() -> {
+    mController.getRightTrigger().onTrue(new InstantCommand(() -> {
       rotationPID.setSetpoint(RotationSetpoint.SINGLE);
       extensionPID.setSetpoint(ExtensionSetpoint.SINGLE);
     }, mRotation, mExtension)).onFalse(restCommand());
 
-    mController.rightStick().onTrue(new InstantCommand(() -> {
+    mController.getLeftTrigger().onTrue(new InstantCommand(() -> {
       rotationPID.setSetpoint(RotationSetpoint.SUBSTATION);
       extensionPID.setSetpoint(ExtensionSetpoint.SUBSTATION);
     }, mRotation, mExtension)).onFalse(restCommand());
 
     mController.start().onTrue(mResetExtension);
 
-    mController.rightBumper().whileTrue(Commands.run(
+    mController.leftBumper().whileTrue(Commands.run(
         () -> mIntake.set(0.5), mIntake)).onFalse(Commands.run(() -> mIntake.set(0.0), mIntake));
 
-    mController.leftBumper().whileTrue(Commands.run(() -> mIntake.set(-0.5), mIntake))
+    mController.rightBumper().whileTrue(Commands.run(() -> mIntake.set(-0.5), mIntake))
         .onFalse(Commands.run(() -> mIntake.set(0), mIntake));
   }
 
@@ -263,7 +285,4 @@ public class RobotContainer {
     return new PrintCommand("No Autonomous Configured");
   }
 
-  public boolean isLowGear() {
-    return dController.getLeftTriggerAxis() > 0.05;
-  }
 }

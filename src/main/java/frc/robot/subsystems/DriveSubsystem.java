@@ -7,7 +7,6 @@ package frc.robot.subsystems;
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
 
-import frc.robot.subsystems.REVSwerveModuleState;
 import SOTAlib.Swerve.ShiftingSwerveModuleState;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -22,7 +21,6 @@ import edu.wpi.first.util.WPIUtilJNI;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.SPI.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.Constants.DriveConstants;
 import frc.utils.SwerveUtils;
 import frc.robot.subsystems.MAXSwerveModule;
@@ -137,12 +135,6 @@ public class DriveSubsystem extends SubsystemBase {
     }
   }
 
-  public void drive(ChassisSpeeds speeds){
-    SwerveModuleState[] moduleStates = mSwerveDriveKinematics.toSwerveModuleStates(speeds, new Translation2d());
-    SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, DriveConstants.kMaxSpeedMetersPerSecond);
-    drive(REVSwerveModuleState.toSwerveModuleState(moduleStates));
-  }
-
   /**
    * Resets the odometry to the specified pose.
    *
@@ -239,6 +231,15 @@ public class DriveSubsystem extends SubsystemBase {
     m_rearRight.setDesiredState(swerveModuleStates[3]);
   }
 
+  public void drive(ChassisSpeeds speeds) {
+    var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(speeds);
+    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
+    m_frontLeft.setDesiredState(swerveModuleStates[0]);
+    m_frontRight.setDesiredState(swerveModuleStates[1]);
+    m_rearLeft.setDesiredState(swerveModuleStates[2]);
+    m_rearRight.setDesiredState(swerveModuleStates[3]);
+  }
+
   /**
    * Sets the wheels into an X formation to prevent movement.
    */
@@ -292,5 +293,9 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public double getTurnRate() {
     return m_gyro.getRate() * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
+  }
+
+  public AHRS getGyro() { 
+    return m_gyro;
   }
 }
