@@ -7,7 +7,6 @@ package frc.robot.subsystems;
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
 
-import frc.robot.subsystems.REVSwerveModuleState;
 import SOTAlib.Swerve.ShiftingSwerveModuleState;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -22,7 +21,6 @@ import edu.wpi.first.util.WPIUtilJNI;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.SPI.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.Constants.DriveConstants;
 import frc.utils.SwerveUtils;
 import frc.robot.subsystems.MAXSwerveModule;
