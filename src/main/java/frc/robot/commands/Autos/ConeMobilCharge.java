@@ -3,6 +3,7 @@ package frc.robot.commands.Autos;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
@@ -19,22 +20,28 @@ import frc.robot.commands.RotationPID.RotationSetpoint;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.DriveSubsystem;
 
-public class TestAuto extends SequentialCommandGroup {
+
+public class ConeMobilCharge extends SequentialCommandGroup{
     
 
-    public TestAuto (
-
+    public ConeMobilCharge(
     DriveSubsystem swerveDrive,
     ExtensionPID mExtensionPID,
+    ResetExtension resetExtension,
+    AutoLevel mAutoLevel,
     RotationPID mRotationPID,
-    SwerveAutoBuilder autoBuilder,
-    Intake mIntake,
-    PathPlannerTrajectory trajectory,
-    ResetExtension resetExtension
-
+    Intake mIntake
+    
+    // PathPlannerTrajectory trajectory
     ) {
+
+        double kLeaveCommunity = 3.3;
+        double kCharge = 1;
         addCommands(
             resetExtension,
+            new InstantCommand(() -> {
+                swerveDrive.updatePose(swerveDrive.getPose());
+            }),
 
             new ParallelCommandGroup(
                 mExtensionPID,
@@ -76,19 +83,35 @@ public class TestAuto extends SequentialCommandGroup {
                     }),
 
                     new WaitUntilCommand(mExtensionPID::atSetpoint).withTimeout(3),
-                    new WaitUntilCommand(mRotationPID::atSetpoint).withTimeout(3)
+                    new WaitUntilCommand(mRotationPID::atSetpoint).withTimeout(3),
 
+                    new RunCommand(() ->
+                        // swerveDrive.drive(
+                        //     0.5, 0, 0, swerveDrive.getRotation2d()
+                        // ), swerveDrive
+                        swerveDrive.drive(new ChassisSpeeds(-1.4,0,0)), swerveDrive
+                    ).withTimeout(kLeaveCommunity),
+
+                    new WaitCommand(0.5),
+
+                    new RunCommand(() -> 
+                        // swerveDrive.drive(
+                        //     new ChassisSpeeds(0,0,0)
+                        // ); 
+                        swerveDrive.drive(new ChassisSpeeds(1.2, 0, 0)), swerveDrive
+                    ).withTimeout(kCharge),
+
+                    mAutoLevel
+
+            
 
                 )
-
             )
-
-            // new PrintCommand("testing")
-
         );
 
-        
 
 
     }
+
+
 }

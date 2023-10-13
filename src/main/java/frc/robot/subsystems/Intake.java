@@ -38,7 +38,7 @@ public class Intake extends SubsystemBase {
         intakeCube(-0.5);
     }
     public void intakeCone(){
-        intakeCone(0.4);
+        intakeCone(0.2);
     }
     public void intakeCube(){
         intakeCube(0.5);

@@ -40,6 +40,9 @@ import frc.robot.commands.JonasFunkyIntake;
 import frc.robot.commands.ResetExtension;
 import frc.robot.commands.RotationPID;
 import frc.robot.commands.Autos.AutoLevel;
+import frc.robot.commands.Autos.ConeMobilBump;
+import frc.robot.commands.Autos.ConeMobilCharge;
+import frc.robot.commands.Autos.PlaceCone;
 import frc.robot.commands.ExtensionPID.ExtensionSetpoint;
 import frc.robot.commands.RotationPID.RotationSetpoint;
 import frc.robot.configs.SuperStructureConfig;
@@ -49,7 +52,9 @@ import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Rotation;
 import frc.robot.subsystems.SuperStructure;
 import frc.robot.commands.Autos.PlaceConeCharge;
-import frc.robot.commands.Autos.PlaceConeMobility;
+import frc.robot.commands.Autos.PlaceConeMobil;
+import frc.robot.commands.Autos.PlaceCubeCharge;
+import frc.robot.commands.Autos.PlaceCubeMobil;
 import frc.robot.commands.Autos.TestAuto;
 import SOTAlib.Factories.AutoFactory;
 
@@ -244,28 +249,40 @@ public class RobotContainer {
 
     // List of autos to choose from
 
-    mAutoChooser.addOption("Place and Mobility", new PlaceConeMobility(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mAutoBuilder, 
-      mIntake, PathPlanner.loadPath("R Cone Mobil", new PathConstraints(2, 1)), new ResetExtension(mExtension)));
-    mAutoChooser.addOption("Place Charge Mobility", new PlaceConeCharge(getNewExtensionPID(), getNewRotationPID(), mIntake, mAutoBuilder, mDriveTrain, 
-    mResetExtension, PathPlanner.loadPath("C Cone Mobil Charge", new PathConstraints(1, 1))));
-    mAutoChooser.addOption("Test path", new TestAuto(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mAutoBuilder, mIntake, 
-    PathPlanner.loadPath("Test Path", new PathConstraints(2, 2)), new ResetExtension(mExtension)));
+    // mAutoChooser.addOption("Place and Mobility", new PlaceConeMobility(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mAutoBuilder, 
+    //   mIntake, PathPlanner.loadPath("R Cone Mobil", new PathConstraints(2, 1)), new ResetExtension(mExtension)));
+    // mAutoChooser.addOption("Place Charge Mobility", new PlaceConeCharge(getNewExtensionPID(), getNewRotationPID(), mIntake, mAutoBuilder, mDriveTrain, 
+    // mResetExtension, PathPlanner.loadPath("C Cone Mobil Charge", new PathConstraints(1, 1))));
+    // mAutoChooser.addOption("Test path", new TestAuto(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mAutoBuilder, mIntake, 
+    // PathPlanner.loadPath("Test Path", new PathConstraints(2, 2)), new ResetExtension(mExtension)));
+    mAutoChooser.addOption("Place Cone", new PlaceCone(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mIntake, new ResetExtension(mExtension)));
+    // mAutoChooser.addOption("Place Cube", new PrintCommand("not done")); //TODO: make this
+    mAutoChooser.addOption("Place Cone Mobility", new PlaceConeMobil(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension), 
+    new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) -> setFieldCentric(state)), getNewRotationPID(), mIntake));
+    // mAutoChooser.addOption("Place Cube Mobility", new PlaceCubeMobil(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension),
+    // new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) -> setFieldCentric(state)), getNewRotationPID(), mIntake));
+    mAutoChooser.addOption("Place Cone Charge", new PlaceConeCharge(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension),
+    new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) -> setFieldCentric(state)), getNewRotationPID(), mIntake));
+    // mAutoChooser.addOption("Place Cube Charge", new PlaceCubeCharge(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension), 
+    // new AutoLevel(mDriveTrain, () -> getFieldCentric(),(state) -> setFieldCentric(state)), rotationPID, mIntake));
+    mAutoChooser.addOption("Place Cone Mobil Bump", new ConeMobilBump(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension), getNewRotationPID(),mIntake));
+    // mAutoChooser.addOption("Place Cube Mobil Bump", new PrintCommand("not done")); //TODO: make this
+    mAutoChooser.addOption("Cone Mobil Charge", new ConeMobilCharge(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension), 
+    new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) -> setFieldCentric(state)), getNewRotationPID(), mIntake));
 
     SmartDashboard.putData(mAutoChooser);
   }
 
   public ExtensionPID getNewExtensionPID() {
 
-    ProfiledPIDController autoExtensController = new ProfiledPIDController(3, 0, 0, null);
-    new TrapezoidProfile.Constraints(40.8, 80.0);
+    ProfiledPIDController autoExtensController = new ProfiledPIDController(3, 0, 0, new TrapezoidProfile.Constraints(40.8, 80.0));
     return new ExtensionPID(autoExtensController, mExtension, superStructure::maxExtension);
 
   }
 
   public RotationPID getNewRotationPID(){
     try {
-      SuperStructureConfig autoSuperStructureConfig = configUtils.readFromClassPath(SuperStructureConfig.class,
-        "SuperStructure/SuperStructure");
+      SuperStructureConfig autoSuperStructureConfig = configUtils.readFromClassPath(SuperStructureConfig.class,"SuperStructure/SuperStructure");
     return new RotationPID(mRotation, mExtension::getLengthFromStart, 
     superStructure::minRotation, superStructure::maxRotation, autoSuperStructureConfig);
     } catch(IOException e) {

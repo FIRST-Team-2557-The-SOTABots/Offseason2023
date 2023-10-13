@@ -19,17 +19,15 @@ import frc.robot.commands.RotationPID.RotationSetpoint;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.DriveSubsystem;
 
-public class TestAuto extends SequentialCommandGroup {
+public class PlaceCone extends SequentialCommandGroup {
     
 
-    public TestAuto (
+    public PlaceCone (
 
     DriveSubsystem swerveDrive,
     ExtensionPID mExtensionPID,
     RotationPID mRotationPID,
-    SwerveAutoBuilder autoBuilder,
     Intake mIntake,
-    PathPlannerTrajectory trajectory,
     ResetExtension resetExtension
 
     ) {
@@ -82,8 +80,6 @@ public class TestAuto extends SequentialCommandGroup {
                 )
 
             )
-
-            // new PrintCommand("testing")
 
         );
 
