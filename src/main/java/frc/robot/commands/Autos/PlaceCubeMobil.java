@@ -56,7 +56,7 @@ public class PlaceCubeMobil extends SequentialCommandGroup{
                     }),
 
                     new InstantCommand(() -> {
-                        mIntake.set(-0.3);
+                        mIntake.set(-0.2);
                     },mIntake
                     ),
 

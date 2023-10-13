@@ -42,6 +42,7 @@ import frc.robot.commands.RotationPID;
 import frc.robot.commands.Autos.AutoLevel;
 import frc.robot.commands.Autos.ConeMobilBump;
 import frc.robot.commands.Autos.ConeMobilCharge;
+import frc.robot.commands.Autos.CubeMobilBump;
 import frc.robot.commands.Autos.PlaceCone;
 import frc.robot.commands.ExtensionPID.ExtensionSetpoint;
 import frc.robot.commands.RotationPID.RotationSetpoint;
@@ -256,7 +257,7 @@ public class RobotContainer {
     // mAutoChooser.addOption("Test path", new TestAuto(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mAutoBuilder, mIntake, 
     // PathPlanner.loadPath("Test Path", new PathConstraints(2, 2)), new ResetExtension(mExtension)));
     mAutoChooser.addOption("Place Cone", new PlaceCone(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mIntake, new ResetExtension(mExtension)));
-    // mAutoChooser.addOption("Place Cube", new PrintCommand("not done")); //TODO: make this
+    // mAutoChooser.addOption("Place Cube", new ("not done")); //TODO: make this
     mAutoChooser.addOption("Place Cone Mobility", new PlaceConeMobil(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension), 
     new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) -> setFieldCentric(state)), getNewRotationPID(), mIntake));
     // mAutoChooser.addOption("Place Cube Mobility", new PlaceCubeMobil(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension),
@@ -266,7 +267,7 @@ public class RobotContainer {
     // mAutoChooser.addOption("Place Cube Charge", new PlaceCubeCharge(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension), 
     // new AutoLevel(mDriveTrain, () -> getFieldCentric(),(state) -> setFieldCentric(state)), rotationPID, mIntake));
     mAutoChooser.addOption("Place Cone Mobil Bump", new ConeMobilBump(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension), getNewRotationPID(),mIntake));
-    // mAutoChooser.addOption("Place Cube Mobil Bump", new PrintCommand("not done")); //TODO: make this
+    // mAutoChooser.addOption("Place Cube Mobil Bump", new CubeMobilBump(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension), getNewRotationPID(), mIntake)); //TODO: make this
     mAutoChooser.addOption("Cone Mobil Charge", new ConeMobilCharge(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension), 
     new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) -> setFieldCentric(state)), getNewRotationPID(), mIntake));
 

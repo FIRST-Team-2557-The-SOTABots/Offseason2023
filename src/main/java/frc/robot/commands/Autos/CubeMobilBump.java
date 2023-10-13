@@ -21,21 +21,20 @@ import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.DriveSubsystem;
 
 
-public class PlaceCubeCharge extends SequentialCommandGroup{
+public class CubeMobilBump extends SequentialCommandGroup{
     
 
-    public PlaceCubeCharge(
+    public CubeMobilBump(
     DriveSubsystem swerveDrive,
     ExtensionPID mExtensionPID,
     ResetExtension resetExtension,
-    AutoLevel mAutoLevel,
     RotationPID mRotationPID,
     Intake mIntake
     
     // PathPlannerTrajectory trajectory
     ) {
 
-        double kMobilityTimeout = 3;
+        double kMobilityTimeout = 4.5;
         addCommands(
             resetExtension,
             new InstantCommand(() -> {
@@ -85,21 +84,13 @@ public class PlaceCubeCharge extends SequentialCommandGroup{
                     new WaitUntilCommand(mRotationPID::atSetpoint).withTimeout(3),
 
                     new RunCommand(() ->
-                        // swerveDrive.drive(
-                        //     0.5, 0, 0, swerveDrive.getRotation2d()
-                        // ), swerveDrive
                         swerveDrive.drive(new ChassisSpeeds(-1,0,0)), swerveDrive
                     ).withTimeout(kMobilityTimeout),
 
                     new RunCommand(() -> {
-                        // swerveDrive.drive(
-                        //     new ChassisSpeeds(0,0,0)
-                        // ); 
-                        swerveDrive.drive(0, 0, 0, true, false);
+                        swerveDrive.drive(0, 0, 0, true, false);; 
                     }
-                    ).withTimeout(0.5),
-
-                    mAutoLevel
+                    ).withTimeout(0.5)
 
             
 
