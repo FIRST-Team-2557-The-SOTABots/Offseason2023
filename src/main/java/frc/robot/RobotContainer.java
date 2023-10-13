@@ -281,8 +281,8 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    // return mAutoChooser.getSelected();
-    return new PrintCommand("No Autonomous Configured");
+    return mAutoChooser.getSelected();
+    // return new PrintCommand("No Autonomous Configured");
   }
 
 }
