@@ -5,6 +5,7 @@ import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -32,11 +33,15 @@ public class TestAuto extends SequentialCommandGroup {
 
     ) {
         addCommands(
-            resetExtension,
-            new InstantCommand(() -> {
-                autoBuilder.followPath(trajectory);
-            }) 
-
+            // resetExtension,
+            // new InstantCommand(() -> {
+            //     // autoBuilder.followPath(trajectory);
+            //     mExtensionPID.setSetpoint(ExtensionSetpoint.MID);
+            //     mRotationPID.setSetpoint(RotationSetpoint.MID);
+            // }),
+            // new WaitUntilCommand(mExtensionPID::atSetpoint),
+            // new WaitUntilCommand(mRotationPID::atSetpoint)
+            new PrintCommand("testing")
 
         );
 
