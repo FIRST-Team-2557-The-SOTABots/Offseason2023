@@ -17,7 +17,7 @@ public class RotationPID extends CommandBase{
         FLOOR(50), //for teleop
         FLOORCONE(70),
         FLOORCONEKNOCK(65),
-        HIGH(123),
+        HIGH(125),
         MID(116),
         MIDCONE(98),
         SUBSTATION(140),
