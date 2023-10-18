@@ -13,7 +13,6 @@ import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 
-
 import SOTAlib.Config.ConfigUtils;
 import SOTAlib.Config.EncoderConfig;
 import SOTAlib.Config.MotorControllerConfig;
@@ -30,8 +29,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.DriveCommand;
@@ -59,7 +61,6 @@ import frc.robot.commands.Autos.PlaceCubeMobil;
 import frc.robot.commands.Autos.TestAuto;
 import SOTAlib.Factories.AutoFactory;
 
-
 public class RobotContainer {
 
   private ConfigUtils configUtils;
@@ -67,7 +68,7 @@ public class RobotContainer {
   private SOTA_Xboxcontroller mController = new SOTA_Xboxcontroller(1);
   private final DriveSubsystem mDriveTrain;
   private boolean driveFieldCentric = true; // REV code is trash and we have to manage this out here
-  private boolean driveLowGear = false; //not a physical low gear just an in code thing
+  private boolean driveLowGear = false; // not a physical low gear just an in code thing
   private Extension mExtension;
   private Rotation mRotation;
   private Intake mIntake;
@@ -78,7 +79,6 @@ public class RobotContainer {
   private JonasFunkyIntake mFunkyIntake;
   private SwerveAutoBuilder mAutoBuilder;
   private SendableChooser<Command> mAutoChooser;
-
 
   public RobotContainer() {
     this.configUtils = new ConfigUtils();
@@ -129,26 +129,25 @@ public class RobotContainer {
 
     Map<String, Command> eventMap = new HashMap<String, Command>();
 
-          eventMap.put("test-event", new PrintCommand("test 1"));
+    eventMap.put("test-event", new PrintCommand("test 1"));
 
-          eventMap.put("test-event2", new PrintCommand("teset 2"));
+    eventMap.put("test-event2", new PrintCommand("teset 2"));
 
-          
-      // eventMap.put("test-event", new InstantCommand(
-      //   () -> {
-      //     rotationPID.setSetpoint(RotationSetpoint.MID);
-      //     extensionPID.setSetpoint(ExtensionSetpoint.MID);
-      //   },
-      //   mRotation, mExtension
-      // ));
-      // eventMap.put("event2", new InstantCommand(
-      //   () -> {
-      //     rotationPID.setSetpoint(RotationSetpoint.MID);
-      //     extensionPID.setSetpoint(ExtensionSetpoint.MID);
-      //   },
-      //   mRotation, mExtension
-      // ));
-      mAutoBuilder = AutoFactory.swerveAutoBuilderGenerator(mDriveTrain, eventMap);
+    // eventMap.put("test-event", new InstantCommand(
+    // () -> {
+    // rotationPID.setSetpoint(RotationSetpoint.MID);
+    // extensionPID.setSetpoint(ExtensionSetpoint.MID);
+    // },
+    // mRotation, mExtension
+    // ));
+    // eventMap.put("event2", new InstantCommand(
+    // () -> {
+    // rotationPID.setSetpoint(RotationSetpoint.MID);
+    // extensionPID.setSetpoint(ExtensionSetpoint.MID);
+    // },
+    // mRotation, mExtension
+    // ));
+    mAutoBuilder = AutoFactory.swerveAutoBuilderGenerator(mDriveTrain, eventMap);
 
     configureAutos();
 
@@ -159,7 +158,7 @@ public class RobotContainer {
   private void setDefaultCommands() {
     mDriveTrain.setDefaultCommand(new DriveCommand(dController::getLeftY, dController::getLeftX, dController::getRightX,
         () -> getFieldCentric(), () -> isLowGear(), mDriveTrain));
-    
+
     mRotation.setDefaultCommand(rotationPID); // ???
     mExtension.setDefaultCommand(extensionPID);
   }
@@ -217,10 +216,15 @@ public class RobotContainer {
     extensionPID.setSetpoint(ExtensionSetpoint.MIDCONE);
     }, mRotation, mExtension)).onFalse(restCommand());
 
+    Command[] highRest = {new InstantCommand(() -> extensionPID.setSetpoint(ExtensionSetpoint.REST), mExtension),
+      new SequentialCommandGroup(new WaitCommand(2), new InstantCommand(() -> rotationPID.setSetpoint(RotationSetpoint.REST), mRotation))};
+
     mController.y().onTrue(new InstantCommand(() -> {
       rotationPID.setSetpoint(RotationSetpoint.HIGH);
       extensionPID.setSetpoint(ExtensionSetpoint.HIGH);
-    }, mRotation, mExtension)).onFalse(restCommand());
+    }, mRotation, mExtension)).onFalse(restCommand());//.onFalse(new SequentialCommandGroup(new InstantCommand(() -> extensionPID.setSetpoint(ExtensionSetpoint.REST), mExtension).withTimeout(1), new InstantCommand(() -> rotationPID.setSetpoint(RotationSetpoint.REST), mRotation)));
+    
+  
 
     mController.getRightTrigger().onTrue(new InstantCommand(() -> {
       rotationPID.setSetpoint(RotationSetpoint.SINGLE);
@@ -239,54 +243,80 @@ public class RobotContainer {
 
     mController.rightBumper().whileTrue(Commands.run(() -> mIntake.set(-0.5), mIntake))
         .onFalse(Commands.run(() -> mIntake.set(0), mIntake));
+
+    mController.back().onTrue(new InstantCommand(() -> {
+      rotationPID.setSetpoint(RotationSetpoint.FLIPOVER);
+    }, mRotation)).onFalse(restCommand());
   }
 
-  
-
-  public void configureAutos(){
+  public void configureAutos() {
 
     this.mAutoChooser = new SendableChooser<>();
     this.mAutoChooser.setDefaultOption("None", null);
 
     // List of autos to choose from
 
-    // mAutoChooser.addOption("Place and Mobility", new PlaceConeMobility(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mAutoBuilder, 
-    //   mIntake, PathPlanner.loadPath("R Cone Mobil", new PathConstraints(2, 1)), new ResetExtension(mExtension)));
-    // mAutoChooser.addOption("Place Charge Mobility", new PlaceConeCharge(getNewExtensionPID(), getNewRotationPID(), mIntake, mAutoBuilder, mDriveTrain, 
-    // mResetExtension, PathPlanner.loadPath("C Cone Mobil Charge", new PathConstraints(1, 1))));
-    // mAutoChooser.addOption("Test path", new TestAuto(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mAutoBuilder, mIntake, 
-    // PathPlanner.loadPath("Test Path", new PathConstraints(2, 2)), new ResetExtension(mExtension)));
-    mAutoChooser.addOption("Place Cone", new PlaceCone(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mIntake, new ResetExtension(mExtension)));
+    // mAutoChooser.addOption("Place and Mobility", new
+    // PlaceConeMobility(mDriveTrain, getNewExtensionPID(), getNewRotationPID(),
+    // mAutoBuilder,
+    // mIntake, PathPlanner.loadPath("R Cone Mobil", new PathConstraints(2, 1)), new
+    // ResetExtension(mExtension)));
+    // mAutoChooser.addOption("Place Charge Mobility", new
+    // PlaceConeCharge(getNewExtensionPID(), getNewRotationPID(), mIntake,
+    // mAutoBuilder, mDriveTrain,
+    // mResetExtension, PathPlanner.loadPath("C Cone Mobil Charge", new
+    // PathConstraints(1, 1))));
+    // mAutoChooser.addOption("Test path", new TestAuto(mDriveTrain,
+    // getNewExtensionPID(), getNewRotationPID(), mAutoBuilder, mIntake,
+    // PathPlanner.loadPath("Test Path", new PathConstraints(2, 2)), new
+    // ResetExtension(mExtension)));
+    mAutoChooser.addOption("Place Cone",
+        new PlaceCone(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mIntake, new ResetExtension(mExtension)));
     // mAutoChooser.addOption("Place Cube", new ("not done")); //TODO: make this
-    mAutoChooser.addOption("Place Cone Mobility", new PlaceConeMobil(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension), 
-    new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) -> setFieldCentric(state)), getNewRotationPID(), mIntake));
-    // mAutoChooser.addOption("Place Cube Mobility", new PlaceCubeMobil(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension),
-    // new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) -> setFieldCentric(state)), getNewRotationPID(), mIntake));
-    mAutoChooser.addOption("Place Cone Charge", new PlaceConeCharge(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension),
-    new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) -> setFieldCentric(state)), getNewRotationPID(), mIntake));
-    // mAutoChooser.addOption("Place Cube Charge", new PlaceCubeCharge(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension), 
-    // new AutoLevel(mDriveTrain, () -> getFieldCentric(),(state) -> setFieldCentric(state)), rotationPID, mIntake));
-    mAutoChooser.addOption("Place Cone Mobil Bump", new ConeMobilBump(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension), getNewRotationPID(),mIntake));
-    // mAutoChooser.addOption("Place Cube Mobil Bump", new CubeMobilBump(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension), getNewRotationPID(), mIntake)); //TODO: make this
-    mAutoChooser.addOption("Cone Mobil Charge", new ConeMobilCharge(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension), 
-    new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) -> setFieldCentric(state)), getNewRotationPID(), mIntake));
+    mAutoChooser.addOption("Place Cone Mobility",
+        new PlaceConeMobil(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension),
+            new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) -> setFieldCentric(state)), getNewRotationPID(),
+            mIntake));
+    // mAutoChooser.addOption("Place Cube Mobility", new PlaceCubeMobil(mDriveTrain,
+    // getNewExtensionPID(), new ResetExtension(mExtension),
+    // new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) ->
+    // setFieldCentric(state)), getNewRotationPID(), mIntake));
+    mAutoChooser.addOption("Place Cone Charge",
+        new PlaceConeCharge(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension),
+            new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) -> setFieldCentric(state)), getNewRotationPID(),
+            mIntake));
+    // mAutoChooser.addOption("Place Cube Charge", new PlaceCubeCharge(mDriveTrain,
+    // getNewExtensionPID(), new ResetExtension(mExtension),
+    // new AutoLevel(mDriveTrain, () -> getFieldCentric(),(state) ->
+    // setFieldCentric(state)), rotationPID, mIntake));
+    mAutoChooser.addOption("Place Cone Mobil Bump", new ConeMobilBump(mDriveTrain, getNewExtensionPID(),
+        new ResetExtension(mExtension), getNewRotationPID(), mIntake));
+    // mAutoChooser.addOption("Place Cube Mobil Bump", new
+    // CubeMobilBump(mDriveTrain, getNewExtensionPID(), new
+    // ResetExtension(mExtension), getNewRotationPID(), mIntake)); //TODO: make this
+    mAutoChooser.addOption("Cone Mobil Charge",
+        new ConeMobilCharge(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension),
+            new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) -> setFieldCentric(state)), getNewRotationPID(),
+            mIntake));
 
     SmartDashboard.putData(mAutoChooser);
   }
 
   public ExtensionPID getNewExtensionPID() {
 
-    ProfiledPIDController autoExtensController = new ProfiledPIDController(3, 0, 0, new TrapezoidProfile.Constraints(40.8, 80.0));
+    ProfiledPIDController autoExtensController = new ProfiledPIDController(3, 0, 0,
+        new TrapezoidProfile.Constraints(40.8, 80.0));
     return new ExtensionPID(autoExtensController, mExtension, superStructure::maxExtension);
 
   }
 
-  public RotationPID getNewRotationPID(){
+  public RotationPID getNewRotationPID() {
     try {
-      SuperStructureConfig autoSuperStructureConfig = configUtils.readFromClassPath(SuperStructureConfig.class,"SuperStructure/SuperStructure");
-    return new RotationPID(mRotation, mExtension::getLengthFromStart, 
-    superStructure::minRotation, superStructure::maxRotation, autoSuperStructureConfig);
-    } catch(IOException e) {
+      SuperStructureConfig autoSuperStructureConfig = configUtils.readFromClassPath(SuperStructureConfig.class,
+          "SuperStructure/SuperStructure");
+      return new RotationPID(mRotation, mExtension::getLengthFromStart,
+          superStructure::minRotation, superStructure::maxRotation, autoSuperStructureConfig);
+    } catch (IOException e) {
       throw new RuntimeException("Not able to create rotation PID");
     }
   }
