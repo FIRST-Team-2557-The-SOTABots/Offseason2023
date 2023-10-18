@@ -20,6 +20,7 @@ public class RotationPID extends CommandBase{
         HIGH(125),
         MID(116),
         MIDCONE(98),
+        FLIPOVER(270),
         SUBSTATION(140),
         SINGLE(98);
     

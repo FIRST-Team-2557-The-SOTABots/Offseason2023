@@ -15,7 +15,7 @@ public class AutoLevel extends CommandBase{
     private PIDController mRollController;
     private boolean prevCentricState;
     private BooleanConsumer setFieldCentric;
-    private double kP = 0.05;
+    private double kP = 0.055;
     private double kD = 0;
     
     public AutoLevel(DriveSubsystem swerveDrive, BooleanSupplier fieldCentric, BooleanConsumer setFieldCentric){
