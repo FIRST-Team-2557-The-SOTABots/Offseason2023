@@ -22,6 +22,7 @@ import SOTAlib.Factories.EncoderFactory;
 import SOTAlib.Factories.MotorControllerFactory;
 import SOTAlib.MotorController.SOTA_MotorController;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -35,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.DriveCommand;
 import frc.robot.commands.ExtensionPID;
@@ -114,8 +116,8 @@ public class RobotContainer {
       this.superStructure = new SuperStructure(mExtension::getLength, mRotation::getRotationDegrees,
           superStructureConfig);
 
-      ProfiledPIDController extensController = new ProfiledPIDController(5, 0, 0,
-          new TrapezoidProfile.Constraints(20.0, 20.0));
+      PIDController extensController = new PIDController(5, 0, 0);
+          // new TrapezoidProfile.Constraints(20.0, 20.0));
 
       this.rotationPID = new RotationPID(mRotation, mExtension::getLengthFromStart, superStructure::minRotation,
           superStructure::maxRotation, superStructureConfig);
@@ -308,8 +310,7 @@ public class RobotContainer {
 
   public ExtensionPID getNewExtensionPID() {
 
-    ProfiledPIDController autoExtensController = new ProfiledPIDController(3, 0, 0,
-        new TrapezoidProfile.Constraints(40.8, 80.0));
+    PIDController autoExtensController = new PIDController(ArmConstants.aP, ArmConstants.aI, ArmConstants.aD);
     return new ExtensionPID(autoExtensController, mExtension, superStructure::maxExtension);
 
   }
