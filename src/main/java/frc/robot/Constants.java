@@ -144,4 +144,14 @@ public final class Constants {
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
   }
+
+  public static final class ArmConstants {
+    public static final double tP = 5;
+    public static final double tI = 0;
+    public static final double tD = 0;
+    
+    public static final double aP = 5;
+    public static final double aI = 0;
+    public static final double aD = 0;
+  }
 }
