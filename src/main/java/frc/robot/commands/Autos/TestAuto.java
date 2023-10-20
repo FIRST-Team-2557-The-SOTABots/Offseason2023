@@ -1,7 +1,9 @@
 package frc.robot.commands.Autos;
 
-import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.auto.SwerveAutoBuilder;
+import com.pathplanner.lib.path.PathPlannerTrajectory;
+
+// import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
@@ -27,7 +29,7 @@ public class TestAuto extends SequentialCommandGroup {
     DriveSubsystem swerveDrive,
     ExtensionPID mExtensionPID,
     RotationPID mRotationPID,
-    SwerveAutoBuilder autoBuilder,
+    AutoBuilder autoBuilder,
     Intake mIntake,
     PathPlannerTrajectory trajectory,
     ResetExtension resetExtension

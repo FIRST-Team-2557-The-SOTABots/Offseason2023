@@ -1,8 +1,5 @@
 package frc.robot.commands.Autos;
 
-import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.auto.SwerveAutoBuilder;
-
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;

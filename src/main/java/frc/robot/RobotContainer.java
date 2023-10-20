@@ -9,9 +9,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 
-import com.pathplanner.lib.auto.SwerveAutoBuilder;
-import com.pathplanner.lib.PathConstraints;
-import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathConstraints;
+
+// import com.pathplanner.lib.auto.SwerveAutoBuilder;
+// import com.pathplanner.lib.PathPlanner;
 
 import SOTAlib.Config.ConfigUtils;
 import SOTAlib.Config.EncoderConfig;
@@ -59,7 +61,7 @@ import frc.robot.commands.Autos.PlaceConeMobil;
 import frc.robot.commands.Autos.PlaceCubeCharge;
 import frc.robot.commands.Autos.PlaceCubeMobil;
 import frc.robot.commands.Autos.TestAuto;
-import SOTAlib.Factories.AutoFactory;
+// import SOTAlib.Factories.AutoFactory;
 
 public class RobotContainer {
 
@@ -77,7 +79,7 @@ public class RobotContainer {
   private ExtensionPID extensionPID;
   private ResetExtension mResetExtension;
   private JonasFunkyIntake mFunkyIntake;
-  private SwerveAutoBuilder mAutoBuilder;
+  private AutoBuilder mAutoBuilder;
   private SendableChooser<Command> mAutoChooser;
 
   public RobotContainer() {
@@ -127,27 +129,9 @@ public class RobotContainer {
       e.printStackTrace();
     }
 
-    Map<String, Command> eventMap = new HashMap<String, Command>();
+    
 
-    eventMap.put("test-event", new PrintCommand("test 1"));
-
-    eventMap.put("test-event2", new PrintCommand("teset 2"));
-
-    // eventMap.put("test-event", new InstantCommand(
-    // () -> {
-    // rotationPID.setSetpoint(RotationSetpoint.MID);
-    // extensionPID.setSetpoint(ExtensionSetpoint.MID);
-    // },
-    // mRotation, mExtension
-    // ));
-    // eventMap.put("event2", new InstantCommand(
-    // () -> {
-    // rotationPID.setSetpoint(RotationSetpoint.MID);
-    // extensionPID.setSetpoint(ExtensionSetpoint.MID);
-    // },
-    // mRotation, mExtension
-    // ));
-    mAutoBuilder = AutoFactory.swerveAutoBuilderGenerator(mDriveTrain, eventMap);
+   
 
     configureAutos();
 
@@ -256,20 +240,7 @@ public class RobotContainer {
 
     // List of autos to choose from
 
-    // mAutoChooser.addOption("Place and Mobility", new
-    // PlaceConeMobility(mDriveTrain, getNewExtensionPID(), getNewRotationPID(),
-    // mAutoBuilder,
-    // mIntake, PathPlanner.loadPath("R Cone Mobil", new PathConstraints(2, 1)), new
-    // ResetExtension(mExtension)));
-    // mAutoChooser.addOption("Place Charge Mobility", new
-    // PlaceConeCharge(getNewExtensionPID(), getNewRotationPID(), mIntake,
-    // mAutoBuilder, mDriveTrain,
-    // mResetExtension, PathPlanner.loadPath("C Cone Mobil Charge", new
-    // PathConstraints(1, 1))));
-    // mAutoChooser.addOption("Test path", new TestAuto(mDriveTrain,
-    // getNewExtensionPID(), getNewRotationPID(), mAutoBuilder, mIntake,
-    // PathPlanner.loadPath("Test Path", new PathConstraints(2, 2)), new
-    // ResetExtension(mExtension)));
+   
     mAutoChooser.addOption("Place Cone",
         new PlaceCone(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mIntake, new ResetExtension(mExtension)));
     // mAutoChooser.addOption("Place Cube", new ("not done")); //TODO: make this
