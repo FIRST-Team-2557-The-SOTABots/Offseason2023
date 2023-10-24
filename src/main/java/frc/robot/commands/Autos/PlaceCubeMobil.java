@@ -38,9 +38,6 @@ public class PlaceCubeMobil extends SequentialCommandGroup{
         double kMobilityTimeout = 3;
         addCommands(
             resetExtension,
-            new InstantCommand(() -> {
-                swerveDrive.updatePose(swerveDrive.getPose());
-            }),
 
             new ParallelCommandGroup(
                 mExtensionPID,

@@ -10,7 +10,9 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
 
 // import com.pathplanner.lib.auto.SwerveAutoBuilder;
 // import com.pathplanner.lib.PathPlanner;
@@ -47,6 +49,7 @@ import frc.robot.commands.Autos.AutoLevel;
 import frc.robot.commands.Autos.ConeMobilBump;
 import frc.robot.commands.Autos.ConeMobilCharge;
 import frc.robot.commands.Autos.CubeMobilBump;
+import frc.robot.commands.Autos.IntakeCubeGround;
 import frc.robot.commands.Autos.PlaceCone;
 import frc.robot.commands.ExtensionPID.ExtensionSetpoint;
 import frc.robot.commands.RotationPID.RotationSetpoint;
@@ -60,6 +63,7 @@ import frc.robot.commands.Autos.PlaceConeCharge;
 import frc.robot.commands.Autos.PlaceConeMobil;
 import frc.robot.commands.Autos.PlaceCubeCharge;
 import frc.robot.commands.Autos.PlaceCubeMobil;
+import frc.robot.commands.Autos.PlaceHighCube;
 import frc.robot.commands.Autos.TestAuto;
 // import SOTAlib.Factories.AutoFactory;
 
@@ -79,8 +83,8 @@ public class RobotContainer {
   private ExtensionPID extensionPID;
   private ResetExtension mResetExtension;
   private JonasFunkyIntake mFunkyIntake;
-  private AutoBuilder mAutoBuilder;
   private SendableChooser<Command> mAutoChooser;
+  private SendableChooser<String> mAutoChooser2;
 
   public RobotContainer() {
     this.configUtils = new ConfigUtils();
@@ -129,10 +133,9 @@ public class RobotContainer {
       e.printStackTrace();
     }
 
-    
 
    
-
+    registerCommands();
     configureAutos();
 
     setDefaultCommands();
@@ -233,6 +236,15 @@ public class RobotContainer {
     }, mRotation)).onFalse(restCommand());
   }
 
+  public void registerCommands() {
+
+    NamedCommands.registerCommand("autoBal", new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) -> setFieldCentric(state)));
+    NamedCommands.registerCommand("PlaceHighCone", new PlaceCone(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mIntake, new ResetExtension(mExtension)));
+    NamedCommands.registerCommand("IntakeCubeGnd", new IntakeCubeGround(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mIntake, new ResetExtension(mExtension)));
+    NamedCommands.registerCommand("PlacecHighCube", new PlaceHighCube(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mIntake, new ResetExtension(mExtension)));
+
+  }
+
   public void configureAutos() {
 
     this.mAutoChooser = new SendableChooser<>();
@@ -241,36 +253,27 @@ public class RobotContainer {
     // List of autos to choose from
 
    
-    mAutoChooser.addOption("Place Cone",
+    mAutoChooser.addOption("Cone",
         new PlaceCone(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mIntake, new ResetExtension(mExtension)));
-    // mAutoChooser.addOption("Place Cube", new ("not done")); //TODO: make this
-    mAutoChooser.addOption("Place Cone Mobility",
+    mAutoChooser.addOption("Cone Mobil",
         new PlaceConeMobil(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension),
-            new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) -> setFieldCentric(state)), getNewRotationPID(),
-            mIntake));
-    // mAutoChooser.addOption("Place Cube Mobility", new PlaceCubeMobil(mDriveTrain,
-    // getNewExtensionPID(), new ResetExtension(mExtension),
-    // new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) ->
-    // setFieldCentric(state)), getNewRotationPID(), mIntake));
-    mAutoChooser.addOption("Place Cone Charge",
+            new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) -> setFieldCentric(state)), getNewRotationPID(), mIntake));
+    mAutoChooser.addOption("Cone Charge",
         new PlaceConeCharge(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension),
-            new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) -> setFieldCentric(state)), getNewRotationPID(),
-            mIntake));
-    // mAutoChooser.addOption("Place Cube Charge", new PlaceCubeCharge(mDriveTrain,
-    // getNewExtensionPID(), new ResetExtension(mExtension),
-    // new AutoLevel(mDriveTrain, () -> getFieldCentric(),(state) ->
-    // setFieldCentric(state)), rotationPID, mIntake));
-    mAutoChooser.addOption("Place Cone Mobil Bump", new ConeMobilBump(mDriveTrain, getNewExtensionPID(),
+            new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) -> setFieldCentric(state)), getNewRotationPID(), mIntake));
+    mAutoChooser.addOption("Cone Mobil Bump", new ConeMobilBump(mDriveTrain, getNewExtensionPID(),
         new ResetExtension(mExtension), getNewRotationPID(), mIntake));
-    // mAutoChooser.addOption("Place Cube Mobil Bump", new
-    // CubeMobilBump(mDriveTrain, getNewExtensionPID(), new
-    // ResetExtension(mExtension), getNewRotationPID(), mIntake)); //TODO: make this
     mAutoChooser.addOption("Cone Mobil Charge",
         new ConeMobilCharge(mDriveTrain, getNewExtensionPID(), new ResetExtension(mExtension),
-            new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) -> setFieldCentric(state)), getNewRotationPID(),
-            mIntake));
+            new AutoLevel(mDriveTrain, () -> getFieldCentric(), (state) -> setFieldCentric(state)), getNewRotationPID(), mIntake));
+
+    this.mAutoChooser2 = new SendableChooser<>();
+    this.mAutoChooser2.setDefaultOption("None", null);
+
+    mAutoChooser2.addOption("Place Cone", null);
 
     SmartDashboard.putData(mAutoChooser);
+    SmartDashboard.putData(mAutoChooser2);
   }
 
   public ExtensionPID getNewExtensionPID() {
@@ -299,9 +302,16 @@ public class RobotContainer {
     }, mRotation, mExtension);
   }
 
-  public Command getAutonomousCommand() {
-    return mAutoChooser.getSelected();
-    // return new PrintCommand("No Autonomous Configured");
-  }
+  // public Command getAutonomousCommand() {
+  //   return mAutoChooser.getSelected();
+  // }
+
+  public Command getAutonomousCommand(){
+    // Load the path you want to follow using its name in the GUI
+    PathPlannerPath path = PathPlannerPath.fromPathFile(mAutoChooser2.getSelected());
+
+    // Create a path following command using AutoBuilder. This will also trigger event markers.
+    return AutoBuilder.followPathWithEvents(path);
+}
 
 }

@@ -67,8 +67,8 @@ public class PlaceCone extends SequentialCommandGroup {
 
                     new InstantCommand(() -> {
 
-                        mExtensionPID.setSetpoint(ExtensionSetpoint.RESET);
-                        mRotationPID.setSetpoint(RotationSetpoint.RESET);
+                        mExtensionPID.setSetpoint(ExtensionSetpoint.REST);
+                        mRotationPID.setSetpoint(RotationSetpoint.REST);
                         
                         mIntake.stop();
                     }),

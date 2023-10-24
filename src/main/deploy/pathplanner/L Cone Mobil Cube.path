@@ -7,8 +7,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.321475520144023,
-        "y": 4.425268148781912
+        "x": 2.5627969681699656,
+        "y": 4.60325256965362
       },
       "holonomicAngle": 179.37040139158978,
       "isReversal": false,
@@ -16,7 +16,9 @@
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
-        "names": [],
+        "names": [
+          "PlaceHighCone"
+        ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
         "waitTime": 0
@@ -78,8 +80,8 @@
         "y": 4.4071316212807865
       },
       "prevControl": {
-        "x": 3.6726468189778485,
-        "y": 4.742657380051602
+        "x": 3.050368891435458,
+        "y": 4.933080635392041
       },
       "nextControl": null,
       "holonomicAngle": 179.01223960036018,
@@ -88,12 +90,24 @@
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
-        "names": [],
+        "names": [
+          "PlaceHighCube"
+        ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
         "waitTime": 0
       }
     }
   ],
-  "markers": []
+  "maxVelocity": 2.0,
+  "maxAcceleration": 1.5,
+  "isReversed": null,
+  "markers": [
+    {
+      "position": 1.0363636363636366,
+      "names": [
+        "IntakeCubeGnd"
+      ]
+    }
+  ]
 }

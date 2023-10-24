@@ -34,9 +34,6 @@ public class CubeMobilBump extends SequentialCommandGroup{
         double kMobilityTimeout = 4.5;
         addCommands(
             resetExtension,
-            new InstantCommand(() -> {
-                swerveDrive.updatePose(swerveDrive.getPose());
-            }),
 
             new ParallelCommandGroup(
                 mExtensionPID,

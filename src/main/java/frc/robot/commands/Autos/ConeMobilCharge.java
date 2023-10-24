@@ -33,9 +33,6 @@ public class ConeMobilCharge extends SequentialCommandGroup{
         double kCharge = 1;
         addCommands(
             resetExtension,
-            new InstantCommand(() -> {
-                swerveDrive.updatePose(swerveDrive.getPose());
-            }),
 
             new ParallelCommandGroup(
                 mExtensionPID,

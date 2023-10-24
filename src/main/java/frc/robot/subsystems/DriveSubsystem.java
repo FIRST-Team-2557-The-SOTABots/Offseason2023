@@ -6,6 +6,10 @@ package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
 // import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 
 import SOTAlib.Swerve.ShiftingSwerveModuleState;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -67,7 +71,7 @@ public class DriveSubsystem extends SubsystemBase {
   private SlewRateLimiter m_rotLimiter = new SlewRateLimiter(DriveConstants.kRotationalSlewRate);
   private double m_prevTime = WPIUtilJNI.now() * 1e-6;
 
-  private MAXSwerveModule[] mModuleArray = {m_frontLeft, m_frontRight, m_rearLeft, m_rearRight};
+  // private MAXSwerveModule[] mModuleArray = {m_frontLeft, m_frontRight, m_rearLeft, m_rearRight};
 
   // Odometry class for tracking robot pose
   SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
@@ -82,6 +86,22 @@ public class DriveSubsystem extends SubsystemBase {
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
+
+
+    AutoBuilder.configureHolonomic(
+      this::getPose,
+      this::resetOdometry,
+      this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE! TODO: make this method
+      this::drive,
+      new HolonomicPathFollowerConfig(
+        new PIDConstants(5.0, 0, 0), 
+        new PIDConstants(5.0, 0, 0), 
+        DriveConstants.kMaxSpeedMetersPerSecond,
+        (0.571 * Math.sqrt(2.0)) / 2, // math things to find the radius of the drive base as a circle
+        new ReplanningConfig()
+        ),
+      this);
+
   }
 
   private void updateSD() {
@@ -112,28 +132,28 @@ public class DriveSubsystem extends SubsystemBase {
     return m_odometry.getPoseMeters();
   }
 
-  public void updatePose(Pose2d pose2d){
-    m_odometry.resetPosition(getRotation2d(), getModulePositions(), pose2d);
-  }
+  // public void updatePose(Pose2d pose2d){
+  //   m_odometry.resetPosition(getRotation2d(), getModulePositions(), pose2d);
+  // }
   
-  private SwerveModulePosition[] getModulePositions() {
-    int moduleNum = mModuleArray.length;
-    SwerveModulePosition[] modulePositions = new SwerveModulePosition[moduleNum];
-    for (int i = 0; i < moduleNum; i++) {
-      modulePositions[i] = mModuleArray[i].getPosition();
-    }
-    return modulePositions;
-  }
+  // private SwerveModulePosition[] getModulePositions() {
+  //   int moduleNum = mModuleArray.length;
+  //   SwerveModulePosition[] modulePositions = new SwerveModulePosition[moduleNum];
+  //   for (int i = 0; i < moduleNum; i++) {
+  //     modulePositions[i] = mModuleArray[i].getPosition();
+  //   }
+  //   return modulePositions;
+  // }
 
   private Rotation2d getRotation2d() {
     return m_gyro.getRotation2d();
   }
 
-  public void drive(SwerveModuleState[] moduleStates) {
-    for (int i = 0; i < moduleStates.length; i++) {
-      mModuleArray[i].setDesiredState(moduleStates[i]);
-    }
-  }
+  // public void drive(SwerveModuleState[] moduleStates) {
+  //   for (int i = 0; i < moduleStates.length; i++) {
+  //     mModuleArray[i].setDesiredState(moduleStates[i]);
+  //   }
+  // }
 
   /**
    * Resets the odometry to the specified pose.
@@ -238,6 +258,21 @@ public class DriveSubsystem extends SubsystemBase {
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_rearLeft.setDesiredState(swerveModuleStates[2]);
     m_rearRight.setDesiredState(swerveModuleStates[3]);
+  }
+
+  public ChassisSpeeds getChassisSpeeds () {
+
+  
+
+    SwerveModuleState[] moduleStatesArray = {m_frontLeft.getState(), m_frontRight.getState(), m_rearLeft.getState(), m_rearRight.getState()};
+  
+    return DriveConstants.kDriveKinematics.toChassisSpeeds(moduleStatesArray);
+
+    // return ChassisSpeeds.fromFieldRelativeSpeeds(m_currentTranslationMag, m_currentTranslationDir, m_currentRotation, 
+    // Rotation2d.fromDegrees(m_gyro.getAngle() * (DriveConstants.kGyroReversed ? -1.0 : 1.0)));
+
+
+
   }
 
   /**
