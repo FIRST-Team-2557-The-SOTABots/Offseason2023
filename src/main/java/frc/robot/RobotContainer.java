@@ -242,6 +242,9 @@ public class RobotContainer {
     NamedCommands.registerCommand("PlaceHighCone", new PlaceCone(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mIntake, new ResetExtension(mExtension)));
     NamedCommands.registerCommand("IntakeCubeGnd", new IntakeCubeGround(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mIntake, new ResetExtension(mExtension)));
     NamedCommands.registerCommand("PlacecHighCube", new PlaceHighCube(mDriveTrain, getNewExtensionPID(), getNewRotationPID(), mIntake, new ResetExtension(mExtension)));
+    NamedCommands.registerCommand("resetExtension", new ResetExtension(mExtension));
+
+    // NamedCommands.registerCommand("test1", new testCommand1());
 
   }
 
@@ -271,9 +274,13 @@ public class RobotContainer {
     this.mAutoChooser2.setDefaultOption("None", null);
 
     mAutoChooser2.addOption("Place Cone", null);
+    mAutoChooser2.addOption("Test 1", "Test Path 1");
+    mAutoChooser2.addOption("test 2", "Test Path 2");
+    mAutoChooser2.addOption("teset 3", "Test Path 3");
+    mAutoChooser2.addOption("test 4", "Test 4 (event)");
 
-    SmartDashboard.putData(mAutoChooser);
-    SmartDashboard.putData(mAutoChooser2);
+    SmartDashboard.putData("DONT USE", mAutoChooser); // use this selector for command based autos. getAutonomousCommand will need to be changed to use this
+    SmartDashboard.putData("Pathplanner Autos", mAutoChooser2); // use this selector for pathplanner based autos. getAutonomousCommand will also need to be changed
   }
 
   public ExtensionPID getNewExtensionPID() {
@@ -307,6 +314,17 @@ public class RobotContainer {
   // }
 
   public Command getAutonomousCommand(){
+
+    // FOR COMMAND BASED AUTOS:
+
+    
+    // return mAutoChooser.getSelected();    
+
+
+
+    // FOR PATHPLANNER AUTOS:
+
+
     // Load the path you want to follow using its name in the GUI
     PathPlannerPath path = PathPlannerPath.fromPathFile(mAutoChooser2.getSelected());
 

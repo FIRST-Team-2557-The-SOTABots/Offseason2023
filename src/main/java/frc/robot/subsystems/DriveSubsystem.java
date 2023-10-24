@@ -91,7 +91,7 @@ public class DriveSubsystem extends SubsystemBase {
     AutoBuilder.configureHolonomic(
       this::getPose,
       this::resetOdometry,
-      this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE! TODO: make this method
+      this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE! TODO: test and probably change
       this::drive,
       new HolonomicPathFollowerConfig(
         new PIDConstants(5.0, 0, 0), 
@@ -261,8 +261,6 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public ChassisSpeeds getChassisSpeeds () {
-
-  
 
     SwerveModuleState[] moduleStatesArray = {m_frontLeft.getState(), m_frontRight.getState(), m_rearLeft.getState(), m_rearRight.getState()};
   
