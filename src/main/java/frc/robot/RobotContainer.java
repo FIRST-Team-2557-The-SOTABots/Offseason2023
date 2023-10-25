@@ -117,7 +117,7 @@ public class RobotContainer {
           superStructureConfig);
 
       PIDController extensController = new PIDController(5, 0, 0);
-          // new TrapezoidProfile.Constraints(20.0, 20.0));
+      // new TrapezoidProfile.Constraints(20.0, 20.0));
 
       this.rotationPID = new RotationPID(mRotation, mExtension::getLengthFromStart, superStructure::minRotation,
           superStructure::maxRotation, superStructureConfig);
@@ -181,9 +181,9 @@ public class RobotContainer {
     dController.start().onTrue(new InstantCommand(
         () -> mDriveTrain.zeroHeading(), mDriveTrain));
 
-    dController.back().whileTrue(new AutoLevel(mDriveTrain, 
-    () -> getFieldCentric(), 
-    (state) -> setFieldCentric(state)));
+    dController.back().whileTrue(new AutoLevel(mDriveTrain,
+        () -> getFieldCentric(),
+        (state) -> setFieldCentric(state)));
 
     dController.rightBumper().onTrue(new InstantCommand(() -> {
       driveFieldCentric = false;
@@ -214,19 +214,21 @@ public class RobotContainer {
     }, mRotation, mExtension)).onFalse(restCommand());
 
     mController.x().onTrue(new InstantCommand(() -> {
-    rotationPID.setSetpoint(RotationSetpoint.MIDCONE);
-    extensionPID.setSetpoint(ExtensionSetpoint.MIDCONE);
+      rotationPID.setSetpoint(RotationSetpoint.MIDCONE);
+      extensionPID.setSetpoint(ExtensionSetpoint.MIDCONE);
     }, mRotation, mExtension)).onFalse(restCommand());
 
-    Command[] highRest = {new InstantCommand(() -> extensionPID.setSetpoint(ExtensionSetpoint.REST), mExtension),
-      new SequentialCommandGroup(new WaitCommand(2), new InstantCommand(() -> rotationPID.setSetpoint(RotationSetpoint.REST), mRotation))};
+    Command[] highRest = { new InstantCommand(() -> extensionPID.setSetpoint(ExtensionSetpoint.REST), mExtension),
+        new SequentialCommandGroup(new WaitCommand(2),
+            new InstantCommand(() -> rotationPID.setSetpoint(RotationSetpoint.REST), mRotation)) };
 
     mController.y().onTrue(new InstantCommand(() -> {
       rotationPID.setSetpoint(RotationSetpoint.HIGH);
       extensionPID.setSetpoint(ExtensionSetpoint.HIGH);
-    }, mRotation, mExtension)).onFalse(restCommand());//.onFalse(new SequentialCommandGroup(new InstantCommand(() -> extensionPID.setSetpoint(ExtensionSetpoint.REST), mExtension).withTimeout(1), new InstantCommand(() -> rotationPID.setSetpoint(RotationSetpoint.REST), mRotation)));
-    
-  
+    }, mRotation, mExtension)).onFalse(restCommand());// .onFalse(new SequentialCommandGroup(new InstantCommand(() ->
+                                                      // extensionPID.setSetpoint(ExtensionSetpoint.REST),
+                                                      // mExtension).withTimeout(1), new InstantCommand(() ->
+                                                      // rotationPID.setSetpoint(RotationSetpoint.REST), mRotation)));
 
     mController.getRightTrigger().onTrue(new InstantCommand(() -> {
       rotationPID.setSetpoint(RotationSetpoint.SINGLE);
@@ -241,10 +243,12 @@ public class RobotContainer {
     mController.start().onTrue(mResetExtension);
 
     mController.leftBumper().whileTrue(Commands.run(
-        () -> mIntake.set(0.5), mIntake)).onFalse(Commands.run(() -> mIntake.set(0.0), mIntake));
+        () -> mIntake.set(0.5), mIntake)).onFalse(Commands.run(() -> mIntake.set(0.1), mIntake));
 
     mController.rightBumper().whileTrue(Commands.run(() -> mIntake.set(-0.5), mIntake))
-        .onFalse(Commands.run(() -> mIntake.set(0), mIntake));
+        .onFalse(Commands.run(() -> mIntake.set(-0.1), mIntake));
+
+    mController.leftStick().onTrue(Commands.run(() -> mIntake.set(0.0), mIntake));
 
     mController.back().onTrue(new InstantCommand(() -> {
       rotationPID.setSetpoint(RotationSetpoint.FLIPOVER);
