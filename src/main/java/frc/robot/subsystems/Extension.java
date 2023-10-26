@@ -24,7 +24,7 @@ public class Extension extends SubsystemBase{
 
     public void setVoltage(double speed){
         SmartDashboard.putNumber("SpeedInit", speed);
-        if(mLimitswitch.get() && speed < 0){
+        if(!mLimitswitch.get() && speed < 0){
            speed = 0;
         }
         if(!hasReset && speed > 0) speed = 0;
@@ -46,7 +46,7 @@ public class Extension extends SubsystemBase{
     }
 
     public boolean isFullyRetracted(){
-        return mLimitswitch.get();
+        return !mLimitswitch.get();
     }
     public double getMaxExtension(){
         return kMaxLength;
@@ -54,7 +54,7 @@ public class Extension extends SubsystemBase{
 
     @Override
     public void periodic() {
-        if(mLimitswitch.get()) {
+        if(!mLimitswitch.get()) {
             mMotor.resetEncoder();
             hasReset = true;
         }
