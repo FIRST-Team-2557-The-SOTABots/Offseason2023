@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -29,14 +30,14 @@ public class ExtensionPID extends CommandBase {
 
     private static final double kExhaustTime = 1.5;
 
-    private ProfiledPIDController extendPID;
+    private PIDController extendPID;
     private Extension mExtension;
     private DoubleSupplier kMaxLength;
     private double mSetpoint;
     private double mThrottle;
     private Timer mExhaustTimer;
 
-    public ExtensionPID(ProfiledPIDController PID, Extension mArm, DoubleSupplier maxLength) {
+    public ExtensionPID(PIDController PID, Extension mArm, DoubleSupplier maxLength) {
         this.extendPID = PID; 
         this.mExtension = mArm; 
         this.kMaxLength = maxLength;
