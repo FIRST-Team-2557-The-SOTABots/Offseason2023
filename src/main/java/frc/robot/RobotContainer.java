@@ -225,7 +225,7 @@ public class RobotContainer {
     mController.y().onTrue(new InstantCommand(() -> {
       rotationPID.setSetpoint(RotationSetpoint.HIGH);
       extensionPID.setSetpoint(ExtensionSetpoint.HIGH);
-    }, mRotation, mExtension)).onFalse(restCommand());// .onFalse(new SequentialCommandGroup(new InstantCommand(() ->
+    }, mRotation, mExtension)).onFalse(new ResetExtension(mExtension).andThen(restCommand()));// .onFalse(new SequentialCommandGroup(new InstantCommand(() ->
                                                       // extensionPID.setSetpoint(ExtensionSetpoint.REST),
                                                       // mExtension).withTimeout(1), new InstantCommand(() ->
                                                       // rotationPID.setSetpoint(RotationSetpoint.REST), mRotation)));
